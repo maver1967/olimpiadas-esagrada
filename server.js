@@ -84,17 +84,29 @@ function startQuestionTimer(duration = 15) {
 
     if (gameState.timerSeconds <= 0) {
       stopTimer();
-      // Scaduto il tempo: Votazione Chiusa
+      // 1. Scaduto il tempo: Votazione Chiusa (2 secondi)
       gameState.status = 'VOTING_CLOSED';
       io.emit('game_state_update', buildPublicGameState());
 
-      // Attesa 2 secondi prima di mostrare la risposta corretta
+      // 2. Dopo 2 secondi: Mostra Risposta Corretta + Chi ha indovinato e chi ha sbagliato (5 secondi)
       setTimeout(async () => {
         gameState.status = 'REVEAL_ANSWER';
         io.emit('game_state_update', buildPublicGameState());
 
-        // Calcola e aggiorna punteggi round
+        // Calcola e salva i punteggi del round
         await processRoundResults();
+
+        // 3. Dopo 5 secondi: Mostra automaticamente la Classifica con i punteggi aggiornati
+        setTimeout(async () => {
+          if (gameState.status === 'REVEAL_ANSWER') {
+            gameState.status = 'ROUND_RESULTS';
+            const leaderboard = await db.getChallengeLeaderboard(gameState.activeChallengeId);
+            const overall = await db.getOverallTournamentLeaderboard();
+            io.emit('game_state_update', buildPublicGameState());
+            io.emit('leaderboard_update', { challenge: leaderboard, overall });
+          }
+        }, 5000);
+
       }, 2000);
     }
   }, 1000);
