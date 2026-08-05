@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Olimpiadas ESagrada - Vista Squadra</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body style="background-color: #0b1120;">
+
+  <div class="team-container">
+    
+    <!-- REGISTRAZIONE SQUADRA -->
+    <div id="screen-register" class="team-registration-card glass-panel" style="margin-top: 30px;">
+      <h1 class="brand-title" style="font-size: 2.2rem; margin-bottom: 10px;">🏆 Olimpiadas ESagrada</h1>
+      <p style="color: var(--text-muted); margin-bottom: 25px;">Iscrivi il tuo gruppo al gioco!</p>
+
+      <form id="form-register">
+        <div class="form-group">
+          <label for="team-name">Nome della Squadra / Gruppo:</label>
+          <input type="text" id="team-name" class="form-input" placeholder="Es. I Filosofi, Gruppo A..." required maxlength="25">
+        </div>
+
+        <div class="form-group">
+          <label>Scegli il Colore del Gruppo:</label>
+          <div class="color-picker-grid" id="color-picker">
+            <div class="color-option selected" data-color="#ef4444" style="background-color: #ef4444;"></div>
+            <div class="color-option" data-color="#3b82f6" style="background-color: #3b82f6;"></div>
+            <div class="color-option" data-color="#10b981" style="background-color: #10b981;"></div>
+            <div class="color-option" data-color="#f59e0b" style="background-color: #f59e0b;"></div>
+            <div class="color-option" data-color="#8b5cf6" style="background-color: #8b5cf6;"></div>
+            <div class="color-option" data-color="#ec4899" style="background-color: #ec4899;"></div>
+            <div class="color-option" data-color="#06b6d4" style="background-color: #06b6d4;"></div>
+            <div class="color-option" data-color="#f97316" style="background-color: #f97316;"></div>
+            <div class="color-option" data-color="#84cc16" style="background-color: #84cc16;"></div>
+            <div class="color-option" data-color="#64748b" style="background-color: #64748b;"></div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.2rem; margin-top: 15px;">
+          Entra in Gara 🚀
+        </button>
+      </form>
+    </div>
+
+    <!-- SCHERMATA ATTESA IN LOBBY -->
+    <div id="screen-lobby" class="glass-panel" style="display: none; text-align: center; padding: 40px 20px; margin-top: 30px;">
+      <div id="my-team-badge" class="team-badge-pill" style="font-size: 1.4rem; padding: 10px 20px; margin-bottom: 20px;">
+        Squadra Registrata
+      </div>
+      <h2 style="font-family: var(--font-heading); margin-bottom: 15px;">Sei pronto! 🎉</h2>
+      <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.5;">
+        Guarda il proiettore. Quando l'organizzatore avvierà la domanda, appariranno qui i pulsanti per rispondere.
+      </p>
+      <div style="margin-top: 30px; font-size: 3rem;" class="pulse-animation">⏳</div>
+    </div>
+
+    <!-- SCHERMATA GIOCO / RISPOSTA SQUADRA -->
+    <div id="screen-play" style="display: none; flex-direction: column; margin-top: 15px;">
+      <!-- Header della domanda -->
+      <div class="glass-panel" style="padding: 15px; text-align: center; margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span id="team-q-category" style="font-weight: 700; color: var(--primary-blue); font-size: 0.9rem;">Generale</span>
+          <span id="team-timer" style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 900; color: var(--accent-gold);">⏰ 15s</span>
+        </div>
+        <p id="team-q-text" style="font-size: 1.15rem; font-weight: 600; line-height: 1.35; color: #fff;">
+          Testo domanda...
+        </p>
+      </div>
+
+      <!-- Stato o Conferma di Voto -->
+      <div id="vote-status-banner" style="text-align: center; padding: 10px; font-weight: 700; border-radius: 10px; margin-bottom: 15px; display: none;">
+        <!-- Messaggio stato voto -->
+      </div>
+
+      <!-- 4 PULSANTI DI RISPOSTA TOUCH -->
+      <div class="team-options-grid">
+        <button class="team-btn-option A" onclick="selectOption('A')">
+          <span>A</span>
+          <span id="team-opt-text-A" style="font-size: 0.85rem; font-weight: 500; opacity: 0.95; margin-top: 4px;"></span>
+        </button>
+        <button class="team-btn-option B" onclick="selectOption('B')">
+          <span>B</span>
+          <span id="team-opt-text-B" style="font-size: 0.85rem; font-weight: 500; opacity: 0.95; margin-top: 4px;"></span>
+        </button>
+        <button class="team-btn-option C" onclick="selectOption('C')">
+          <span>C</span>
+          <span id="team-opt-text-C" style="font-size: 0.85rem; font-weight: 500; opacity: 0.95; margin-top: 4px;"></span>
+        </button>
+        <button class="team-btn-option D" onclick="selectOption('D')">
+          <span>D</span>
+          <span id="team-opt-text-D" style="font-size: 0.85rem; font-weight: 500; opacity: 0.95; margin-top: 4px;"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- REVEAL RISULTATO DELLA SQUADRA -->
+    <div id="screen-result" class="glass-panel" style="display: none; text-align: center; padding: 35px 20px; margin-top: 30px;">
+      <div id="result-icon" style="font-size: 4rem; margin-bottom: 15px;">🎉</div>
+      <h2 id="result-title" style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 10px;">Risposta Corretta!</h2>
+      <p id="result-subtitle" style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 20px;">+100 punti alla tua squadra</p>
+      <p style="font-size: 0.95rem;">Guarda il proiettore per il punteggio aggiornato.</p>
+    </div>
+
+  </div>
+
+  <script>
+    const socket = io();
+
+    let selectedColor = '#ef4444';
+    let currentTeam = null;
+    let selectedOptionLetter = null;
+    let isVoteLocked = false;
+
+    // Palette Colori
+    document.querySelectorAll('.color-option').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.color-option').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedColor = el.getAttribute('data-color');
+      });
+    });
+
+    // Form Registrazione Squadra
+    document.getElementById('form-register').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('team-name').value.trim();
+      if (!name) return;
+
+      socket.emit('team_join', { name, color: selectedColor });
+    });
+
+    socket.on('team_joined', (team) => {
+      currentTeam = team;
+      localStorage.setItem('esagrada_team', JSON.stringify(team));
+
+      document.getElementById('screen-register').style.display = 'none';
+      document.getElementById('screen-lobby').style.display = 'block';
+
+      const badge = document.getElementById('my-team-badge');
+      badge.style.backgroundColor = team.color;
+      badge.innerText = team.name;
+    });
+
+    // Controlla se esisteva una registrazione previa
+    const saved = localStorage.getItem('esagrada_team');
+    if (saved) {
+      try {
+        const team = JSON.parse(saved);
+        document.getElementById('team-name').value = team.name;
+        socket.emit('team_join', { name: team.name, color: team.color });
+      } catch(e) {}
+    }
+
+    // Gestione selezione opzione
+    function selectOption(letter) {
+      if (isVoteLocked || !currentTeam) return;
+
+      selectedOptionLetter = letter;
+      socket.emit('submit_vote', { option: letter });
+
+      document.querySelectorAll('.team-btn-option').forEach(btn => btn.classList.remove('selected'));
+      const chosenBtn = document.querySelector(`.team-btn-option.${letter}`);
+      if (chosenBtn) chosenBtn.classList.add('selected');
+
+      const statusBanner = document.getElementById('vote-status-banner');
+      statusBanner.style.display = 'block';
+      statusBanner.style.background = 'rgba(59, 130, 246, 0.3)';
+      statusBanner.style.color = '#fff';
+      statusBanner.innerText = `Hai selezionato l'opzione ${letter}. Puoi cambiare finché il tempo non scade!`;
+    }
+
+    socket.on('vote_accepted', (data) => {
+      // Conferma voto registrato
+    });
+
+    socket.on('game_state_update', (state) => {
+      if (!currentTeam) return;
+
+      const screenLobby = document.getElementById('screen-lobby');
+      const screenPlay = document.getElementById('screen-play');
+      const screenResult = document.getElementById('screen-result');
+
+      if (state.status === 'LOBBY') {
+        screenLobby.style.display = 'block';
+        screenPlay.style.display = 'none';
+        screenResult.style.display = 'none';
+        selectedOptionLetter = null;
+        isVoteLocked = false;
+      }
+      else if (state.status === 'QUESTION_ACTIVE' || state.status === 'VOTING_CLOSED' || state.status === 'REVEAL_ANSWER') {
+        screenLobby.style.display = 'none';
+
+        if (state.status === 'QUESTION_ACTIVE') {
+          screenPlay.style.display = 'flex';
+          screenResult.style.display = 'none';
+          isVoteLocked = false;
+
+          document.querySelectorAll('.team-btn-option').forEach(b => b.disabled = false);
+
+          if (state.activeQuestion) {
+            document.getElementById('team-q-category').innerText = state.activeQuestion.category || 'Generale';
+            document.getElementById('team-q-text').innerText = state.activeQuestion.text;
+            document.getElementById('team-opt-text-A').innerText = state.activeQuestion.option_a;
+            document.getElementById('team-opt-text-B').innerText = state.activeQuestion.option_b;
+            document.getElementById('team-opt-text-C').innerText = state.activeQuestion.option_c;
+            document.getElementById('team-opt-text-D').innerText = state.activeQuestion.option_d;
+          }
+        }
+        else if (state.status === 'VOTING_CLOSED') {
+          isVoteLocked = true;
+          document.querySelectorAll('.team-btn-option').forEach(b => b.disabled = true);
+          const statusBanner = document.getElementById('vote-status-banner');
+          statusBanner.style.display = 'block';
+          statusBanner.style.background = 'rgba(239, 68, 68, 0.4)';
+          statusBanner.innerText = '⏰ Tempo scaduto! Votazione chiusa.';
+        }
+        else if (state.status === 'REVEAL_ANSWER') {
+          screenPlay.style.display = 'none';
+          screenResult.style.display = 'block';
+
+          const correctOpt = state.activeQuestion?.correct_option?.toUpperCase();
+          const userOpt = selectedOptionLetter?.toUpperCase();
+
+          const rIcon = document.getElementById('result-icon');
+          const rTitle = document.getElementById('result-title');
+          const rSub = document.getElementById('result-subtitle');
+
+          if (userOpt && userOpt === correctOpt) {
+            rIcon.innerText = '🎉';
+            rTitle.innerText = 'Risposta Esatta!';
+            rTitle.style.color = 'var(--success-green)';
+            rSub.innerText = `Bravi! Avete indovinato l'opzione ${correctOpt}.`;
+          } else if (userOpt) {
+            rIcon.innerText = '❌';
+            rTitle.innerText = 'Risposta Sbagliata!';
+            rTitle.style.color = 'var(--danger-red)';
+            rSub.innerText = `Avete scelto ${userOpt}. La risposta corretta era ${correctOpt}.`;
+          } else {
+            rIcon.innerText = '⏱️';
+            rTitle.innerText = 'Tempo Scaduto!';
+            rTitle.style.color = 'var(--accent-gold)';
+            rSub.innerText = `Non avete inviato in tempo. La risposta era ${correctOpt}.`;
+          }
+        }
+      }
+      else if (state.status === 'ROUND_RESULTS' || state.status === 'TOURNAMENT_LEADERBOARD') {
+        screenPlay.style.display = 'none';
+        screenLobby.style.display = 'block';
+      }
+    });
+
+    socket.on('timer_tick', (data) => {
+      document.getElementById('team-timer').innerText = `⏰ ${data.seconds}s`;
+    });
+  </script>
+</body>
+</html>

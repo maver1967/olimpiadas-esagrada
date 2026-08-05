@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olimpiadas ESagrada - Torneo Quiz Intranet</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#f59e0b">
+</head>
+<body>
+
+  <div class="hero-container">
+    <h1 class="brand-title" style="font-size: 3.2rem; margin-bottom: 10px;">🏆 Olimpiadas ESagrada</h1>
+    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 25px;">
+      Sistema Quiz a Squadre in Tempo Reale per Rete Intranet Scolastica
+    </p>
+
+    <div id="ip-info-box" class="glass-panel" style="padding: 20px; margin-bottom: 30px;">
+      <h3 style="color: var(--accent-gold); margin-bottom: 10px;">📶 Connessione Intranet Locale</h3>
+      <p style="font-size: 1.1rem;" id="server-url-display">Caricamento indirizzo IP...</p>
+      <div id="qr-code-wrapper" style="margin-top: 15px;">
+        <img id="qr-code-img" src="" alt="QR Code Connessione" style="width: 180px; height: 180px; border-radius: 12px; border: 4px solid var(--accent-gold);">
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 10px;">
+        Scansiona il QR Code con lo smartphone per accedere alla vista Squadra
+      </p>
+    </div>
+
+    <h2 style="font-family: var(--font-heading); margin-bottom: 20px;">Scegli il tuo ruolo:</h2>
+
+    <div class="role-cards">
+      <a href="/team.html" class="role-card glass-panel">
+        <span class="role-icon">📱</span>
+        <h3 style="font-size: 1.5rem;">Partecipa come Squadra</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Inquadra il QR Code dal telefono, scegli il nome della squadra, il colore e rispondi alle domande in 15 secondi!
+        </p>
+      </a>
+
+      <a href="/projector.html" class="role-card glass-panel">
+        <span class="role-icon">📺</span>
+        <h3 style="font-size: 1.5rem;">Schermo Proiettore</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Da proiettare in aula/auditorium. Domande giganti, timer 15s animato, risposta esatta e classifica dal vivo.
+        </p>
+      </a>
+
+      <a href="/admin.html" class="role-card glass-panel">
+        <span class="role-icon">🎛️</span>
+        <h3 style="font-size: 1.5rem;">Pannello Regia Admin</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Accessibile con PIN da qualsiasi computer della rete. Precarica le domande, controlla il gioco e gestisci il torneo.
+        </p>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    fetch('/api/info')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('server-url-display').innerHTML = 
+          `Accedi dal tuo smartphone alla stessa rete Wi-Fi: <br><strong style="font-size: 1.4rem; color: #fff;">${data.serverUrl}/team.html</strong>`;
+        if (data.qrCode) {
+          document.getElementById('qr-code-img').src = data.qrCode;
+        }
+      })
+      .catch(err => {
+        document.getElementById('server-url-display').innerText = "Impossibile caricare info rete.";
+      });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
+</body>
+</html>
