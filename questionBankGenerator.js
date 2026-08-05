@@ -205,30 +205,50 @@ const questionsCatalog = {
 function generateQuestions(subject, difficulty, count = 5) {
   let selectedSet = [];
 
+  // 1. Cerca domande della disciplina e difficoltà specifica
   if (questionsCatalog[subject] && questionsCatalog[subject][difficulty]) {
-    selectedSet = questionsCatalog[subject][difficulty];
-  } else {
-    // Busca em todas as categorias se a específica não for encontrada ou tenta parcial
-    for (let cat of Object.keys(questionsCatalog)) {
-      if (cat.toLowerCase().includes(subject.toLowerCase()) || subject.toLowerCase().includes(cat.toLowerCase())) {
-        if (questionsCatalog[cat][difficulty]) {
-          selectedSet = selectedSet.concat(questionsCatalog[cat][difficulty]);
-        }
+    selectedSet = [...questionsCatalog[subject][difficulty]];
+  }
+
+  // 2. Se non bastano, aggiungi domande da outros níveis da mesma disciplina
+  if (selectedSet.length < count && questionsCatalog[subject]) {
+    for (let diff of Object.keys(questionsCatalog[subject])) {
+      if (diff !== difficulty) {
+        selectedSet = selectedSet.concat(questionsCatalog[subject][diff]);
       }
     }
-    // Se ainda vazio, junta tudo do nível
-    if (selectedSet.length === 0) {
-      for (let cat of Object.keys(questionsCatalog)) {
-        if (questionsCatalog[cat][difficulty]) {
-          selectedSet = selectedSet.concat(questionsCatalog[cat][difficulty]);
+  }
+
+  // 3. Se ainda não bastano, busca em disciplinas similares ou em todo o catálogo
+  if (selectedSet.length < count) {
+    for (let cat of Object.keys(questionsCatalog)) {
+      for (let diff of Object.keys(questionsCatalog[cat])) {
+        const items = questionsCatalog[cat][diff];
+        for (let item of items) {
+          if (!selectedSet.some(q => q.text === item.text)) {
+            selectedSet.push(item);
+          }
         }
       }
     }
   }
 
-  // Embaralha e seleciona 'count' perguntas
-  const shuffled = [...selectedSet].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+  // Embaralha todas as perguntas encontradas
+  let shuffled = [...selectedSet].sort(() => 0.5 - Math.random());
+
+  // 4. Se ainda assim forem menos do que o 'count' pedido, duplica variações para garantir a quantidade exacta
+  let result = [];
+  let index = 0;
+  while (result.length < count && shuffled.length > 0) {
+    let q = shuffled[index % shuffled.length];
+    result.push({
+      ...q,
+      text: result.some(r => r.text === q.text) ? `${q.text} (Variante ${Math.floor(result.length / shuffled.length) + 1})` : q.text
+    });
+    index++;
+  }
+
+  return result.slice(0, count);
 }
 
 module.exports = {

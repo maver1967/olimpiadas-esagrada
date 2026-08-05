@@ -221,12 +221,15 @@ const questionGenerator = require('./questionBankGenerator');
 app.post('/api/admin/questions/auto-generate', async (req, res) => {
   const { challenge_id, subject, difficulty, count } = req.body;
   try {
-    const generated = questionGenerator.generateQuestions(subject, difficulty, count || 5);
+    const numRequested = parseInt(count) || 5;
+    const existing = await db.getQuestionsForChallenge(challenge_id);
+    let order = existing.length + 1;
+
+    const generated = questionGenerator.generateQuestions(subject, difficulty, numRequested);
     if (generated.length === 0) {
       return res.status(400).json({ error: "Nenhuma pergunta encontrada para esta disciplina/nível." });
     }
 
-    let order = 1;
     for (let q of generated) {
       await db.saveQuestion({
         challenge_id,
@@ -238,7 +241,7 @@ app.post('/api/admin/questions/auto-generate', async (req, res) => {
         option_c: q.c,
         option_d: q.d,
         correct_option: q.correct,
-        points: 100,
+        points: 1,
         time_limit: 15
       });
     }
