@@ -197,6 +197,21 @@ function buildPublicGameState() {
     teamsCount: Object.keys(gameState.connectedTeams).length,
     votedCount: Object.keys(gameState.responses).length
   };
+// Helper per aggiornare in tempo reale le domande della sfida attiva
+async function refreshActiveChallengeQuestions(challengeId) {
+  if (gameState.activeChallengeId == challengeId) {
+    const questions = await db.getQuestionsForChallenge(challengeId);
+    gameState.questions = questions;
+    if (gameState.currentQuestionIndex >= questions.length) {
+      gameState.currentQuestionIndex = Math.max(0, questions.length - 1);
+    }
+    if (questions.length > 0) {
+      gameState.activeQuestion = questions[gameState.currentQuestionIndex];
+    } else {
+      gameState.activeQuestion = null;
+    }
+    io.emit('game_state_update', buildPublicGameState());
+  }
 }
 
 // --- GERADOR AUTOMÁTICO DE PERGUNTAS POR DISCIPLINA & NÍVEL ---
@@ -227,6 +242,7 @@ app.post('/api/admin/questions/auto-generate', async (req, res) => {
       });
     }
 
+    await refreshActiveChallengeQuestions(challenge_id);
     res.json({ success: true, count: generated.length });
   } catch (err) {
     res.status(500).json({ error: "Erro ao gerar perguntas: " + err.message });
@@ -254,6 +270,7 @@ app.post('/api/admin/sheets/import-url', async (req, res) => {
       });
     }
 
+    await refreshActiveChallengeQuestions(challenge_id);
     res.json({ success: true, count: questions.length });
   } catch (err) {
     res.status(500).json({ error: "Errore durante l'importazione da Google Sheets: " + err.message });
@@ -358,6 +375,9 @@ app.get('/api/admin/challenges/:id/questions', async (req, res) => {
 app.post('/api/admin/questions', async (req, res) => {
   try {
     const id = await db.saveQuestion(req.body);
+    if (req.body.challenge_id) {
+      await refreshActiveChallengeQuestions(req.body.challenge_id);
+    }
     res.json({ success: true, id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -368,6 +388,9 @@ app.post('/api/admin/questions', async (req, res) => {
 app.delete('/api/admin/questions/:id', async (req, res) => {
   try {
     await db.deleteQuestion(req.params.id);
+    if (gameState.activeChallengeId) {
+      await refreshActiveChallengeQuestions(gameState.activeChallengeId);
+    }
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -379,6 +402,7 @@ app.post('/api/admin/questions/reorder', async (req, res) => {
   const { challenge_id, question_ids } = req.body;
   try {
     await db.reorderQuestions(challenge_id, question_ids);
+    await refreshActiveChallengeQuestions(challenge_id);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
