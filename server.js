@@ -593,37 +593,47 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Avvio o Prossima Domanda
+  // Avvio Domanda (Bloqueia perguntas já realizadas)
   socket.on('admin_start_question', ({ pin }) => {
     if (pin !== ADMIN_PIN) return socket.emit('admin_error', 'PIN Errato');
 
     if (!gameState.questions || gameState.questions.length === 0) {
-      return socket.emit('admin_error', 'Nessuna domanda caricata.');
+      return socket.emit('admin_error', 'Nenhuma pergunta carregada neste desafio.');
+    }
+
+    const currentQ = gameState.activeQuestion;
+    if (currentQ && gameState.completedQuestionIds.includes(currentQ.id)) {
+      return socket.emit('admin_error', '⚠️ Esta pergunta já foi realizada! Seleciona uma pergunta pendente (⏳ POR REALIZAR).');
     }
 
     gameState.status = 'QUESTION_ACTIVE';
     gameState.responses = {}; // Reset risposte del round
 
-    const timeLimit = gameState.activeQuestion.time_limit || 15;
+    const timeLimit = gameState.activeQuestion ? (gameState.activeQuestion.time_limit || 15) : 15;
     startQuestionTimer(timeLimit);
 
     io.emit('game_state_update', buildPublicGameState());
   });
 
-  // Passa alla prossima domanda
+  // Passa alla prossima domanda (salta domande già svolte)
   socket.on('admin_next_question', ({ pin }) => {
     if (pin !== ADMIN_PIN) return socket.emit('admin_error', 'PIN Errato');
 
-    if (gameState.currentQuestionIndex + 1 < gameState.questions.length) {
+    let nextIndex = gameState.currentQuestionIndex + 1;
+    while (nextIndex < gameState.questions.length && gameState.completedQuestionIds.includes(gameState.questions[nextIndex].id)) {
+      nextIndex++;
+    }
+
+    if (nextIndex < gameState.questions.length) {
       stopTimer();
-      gameState.currentQuestionIndex += 1;
-      gameState.activeQuestion = gameState.questions[gameState.currentQuestionIndex];
+      gameState.currentQuestionIndex = nextIndex;
+      gameState.activeQuestion = gameState.questions[nextIndex];
       gameState.status = 'LOBBY';
       gameState.responses = {};
 
       io.emit('game_state_update', buildPublicGameState());
     } else {
-      socket.emit('admin_info', 'Hai raggiunto l\'ultima domanda della sfida.');
+      socket.emit('admin_info', 'Chegaste ao fim das perguntas desta sessão!');
     }
   });
 
