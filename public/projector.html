@@ -84,6 +84,31 @@
             <span id="text-opt-D" style="flex: 1;">Opzione D</span>
           </div>
         </div>
+
+        <!-- SEZIONE ESITO SQUADRE (CHI HA INDOVINATO E CHI HA SBAGLIATO) -->
+        <div id="team-outcomes-container" style="display: none; margin-top: 25px; background: rgba(15, 23, 42, 0.85); padding: 20px 30px; border-radius: 16px; border: 2px solid var(--accent-gold);">
+          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--accent-gold); margin-bottom: 15px;">
+            📊 RIEPILOGO RISPOSTE SQUADRE
+          </h3>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left;">
+            <!-- Squadre Corrette -->
+            <div style="background: rgba(16, 185, 129, 0.15); padding: 15px; border-radius: 12px; border: 1px solid var(--success-green);">
+              <h4 style="color: var(--success-green); font-size: 1.2rem; margin-bottom: 10px;">✅ Hanno Indovinato (+100pt):</h4>
+              <div id="correct-teams-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <!-- Generato via JS -->
+              </div>
+            </div>
+
+            <!-- Squadre Errate / Non risposte -->
+            <div style="background: rgba(239, 68, 68, 0.15); padding: 15px; border-radius: 12px; border: 1px solid var(--danger-red);">
+              <h4 style="color: var(--danger-red); font-size: 1.2rem; margin-bottom: 10px;">❌ Hanno Sbagliato / Tempo Scaduto:</h4>
+              <div id="incorrect-teams-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <!-- Generato via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- BANNER "VOTAZIONE CHIUSA" -->
@@ -205,7 +230,8 @@
             el.classList.remove('correct', 'incorrect');
           });
 
-          // Mostra risposta corretta quando in REVEAL_ANSWER
+          // Mostra risposta corretta e riepilogo squadre quando in REVEAL_ANSWER
+          const outcomesContainer = document.getElementById('team-outcomes-container');
           if (state.status === 'REVEAL_ANSWER' && state.activeQuestion.correct_option) {
             const correct = state.activeQuestion.correct_option.toUpperCase();
             ['A', 'B', 'C', 'D'].forEach(opt => {
@@ -216,6 +242,39 @@
                 el.classList.add('incorrect');
               }
             });
+
+            // Popola l'esito visivo per ciascuna squadra
+            if (state.teamOutcomes && state.teamOutcomes.length > 0) {
+              outcomesContainer.style.display = 'block';
+
+              const correctTeams = state.teamOutcomes.filter(t => t.isCorrect);
+              const incorrectTeams = state.teamOutcomes.filter(t => !t.isCorrect);
+
+              const correctList = document.getElementById('correct-teams-list');
+              const incorrectList = document.getElementById('incorrect-teams-list');
+
+              if (correctTeams.length > 0) {
+                correctList.innerHTML = correctTeams.map(t => `
+                  <div class="team-badge-pill" style="background-color: ${t.color}; box-shadow: 0 4px 10px ${t.color}66; font-size: 1.1rem; padding: 8px 16px;">
+                    <span>${t.name} (${t.selectedOption})</span> ✅
+                  </div>
+                `).join('');
+              } else {
+                correctList.innerHTML = '<p style="color: var(--text-muted); font-size: 1rem;">Nessuna squadra ha indovinato.</p>';
+              }
+
+              if (incorrectTeams.length > 0) {
+                incorrectList.innerHTML = incorrectTeams.map(t => `
+                  <div class="team-badge-pill" style="background-color: ${t.color}; opacity: 0.8; font-size: 1rem; padding: 6px 14px;">
+                    <span>${t.name} ${t.selectedOption ? '(' + t.selectedOption + ')' : '(Scaduta)'}</span> ❌
+                  </div>
+                `).join('');
+              } else {
+                incorrectList.innerHTML = '<p style="color: var(--text-muted); font-size: 1rem;">Nessun errore!</p>';
+              }
+            }
+          } else {
+            outcomesContainer.style.display = 'none';
           }
         }
 

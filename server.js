@@ -152,6 +152,23 @@ function buildPublicGameState() {
     };
   }
 
+  // Dettaglio risposte squadre per la domanda corrente
+  let teamOutcomes = [];
+  if (gameState.status === 'REVEAL_ANSWER' || gameState.status === 'ROUND_RESULTS') {
+    const correctOpt = gameState.activeQuestion ? gameState.activeQuestion.correct_option.toUpperCase() : '';
+    teamOutcomes = Object.values(gameState.connectedTeams).map(team => {
+      const resp = gameState.responses[team.id];
+      const selected = resp ? resp.option.toUpperCase() : null;
+      return {
+        id: team.id,
+        name: team.name,
+        color: team.color,
+        selectedOption: selected,
+        isCorrect: selected === correctOpt
+      };
+    });
+  }
+
   return {
     status: gameState.status,
     activeChallengeId: gameState.activeChallengeId,
@@ -160,6 +177,7 @@ function buildPublicGameState() {
     currentQuestionIndex: gameState.currentQuestionIndex,
     totalQuestions: gameState.questions.length,
     activeQuestion: safeQuestion,
+    teamOutcomes: teamOutcomes,
     timerSeconds: gameState.timerSeconds,
     timerMax: gameState.timerMax,
     serverUrl: serverUrl,
