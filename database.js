@@ -2,13 +2,15 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-// Assicura l'esistenza della cartella ./data per il database portabile
-const dataDir = path.join(__dirname, 'data');
+// Suporte para disco persistente no Render (/var/data) ou directoria de dados local
+const dataDir = process.env.DATA_DIR || (fs.existsSync('/var/data') ? '/var/data' : path.join(__dirname, 'data'));
 if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+  try { fs.mkdirSync(dataDir, { recursive: true }); } catch(e) {}
 }
 
-const dbPath = path.join(dataDir, 'olimpiadas.db');
+const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'olimpiadas.db');
+console.log('📍 Ficheiro da Base de Dados SQLite localizado em:', dbPath);
+
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Errore durante l\'apertura del database SQLite:', err.message);
