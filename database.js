@@ -215,40 +215,49 @@ module.exports = {
     }
   },
 
-  // Risposte e Punteggi
+  // Risposte e Punteggi (1 punto per ciascuna risposta corretta, 0 per errata)
   async recordResponse(challengeId, questionId, teamId, selectedOption, isCorrect, pointsAwarded, responseTimeMs) {
+    // Evita duplicati per la stessa domanda e squadra
+    await dbQuery.run(`
+      DELETE FROM responses WHERE challenge_id = ? AND question_id = ? AND team_id = ?
+    `, [challengeId, questionId, teamId]);
+
+    const pts = isCorrect ? 1 : 0;
+
     await dbQuery.run(`
       INSERT INTO responses (challenge_id, question_id, team_id, selected_option, is_correct, points_awarded, response_time_ms)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, [challengeId, questionId, teamId, selectedOption, isCorrect ? 1 : 0, pointsAwarded, responseTimeMs]);
+    `, [challengeId, questionId, teamId, selectedOption, isCorrect ? 1 : 0, pts, responseTimeMs]);
 
-    if (pointsAwarded > 0) {
-      await dbQuery.run(`
-        INSERT INTO match_scores (challenge_id, team_id, score)
-        VALUES (?, ?, ?)
-        ON CONFLICT(challenge_id, team_id) DO UPDATE SET
-        score = score + excluded.score,
-        updated_at = CURRENT_TIMESTAMP
-      `, [challengeId, teamId, pointsAwarded]);
-    }
+    // Aggiorna match_scores
+    await dbQuery.run(`
+      INSERT INTO match_scores (challenge_id, team_id, score)
+      VALUES (?, ?, ?)
+      ON CONFLICT(challenge_id, team_id) DO UPDATE SET
+      score = (SELECT COUNT(*) FROM responses WHERE challenge_id = ? AND team_id = ? AND is_correct = 1),
+      updated_at = CURRENT_TIMESTAMP
+    `, [challengeId, teamId, pts, challengeId, teamId]);
   },
 
-  // Classifica Sfida Singola
+  // Classifica Sfida Singola (Calcolo esatto 1 pt per risposta corretta)
   async getChallengeLeaderboard(challengeId) {
     return await dbQuery.all(`
-      SELECT t.id, t.name, t.color, COALESCE(ms.score, 0) as score
+      SELECT t.id, t.name, t.color, 
+             COALESCE(SUM(CASE WHEN r.is_correct = 1 THEN 1 ELSE 0 END), 0) as score
       FROM teams t
-      LEFT JOIN match_scores ms ON ms.team_id = t.id AND ms.challenge_id = ?
+      LEFT JOIN responses r ON r.team_id = t.id AND r.challenge_id = ?
+      GROUP BY t.id, t.name, t.color
       ORDER BY score DESC, t.name ASC
     `, [challengeId]);
   },
 
-  // Classifica Generale del Torneo (Tutte le settimane)
+  // Classifica Generale del Torneo (Somma 1 pt per ciascuna risposta corretta di todas as semanas)
   async getOverallTournamentLeaderboard() {
     return await dbQuery.all(`
-      SELECT t.id, t.name, t.color, COALESCE(SUM(ms.score), 0) as total_score
+      SELECT t.id, t.name, t.color, 
+             COALESCE(SUM(CASE WHEN r.is_correct = 1 THEN 1 ELSE 0 END), 0) as total_score
       FROM teams t
-      LEFT JOIN match_scores ms ON ms.team_id = t.id
+      LEFT JOIN responses r ON r.team_id = t.id
       GROUP BY t.id, t.name, t.color
       ORDER BY total_score DESC, t.name ASC
     `);

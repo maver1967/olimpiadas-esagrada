@@ -112,30 +112,31 @@ function startQuestionTimer(duration = 15) {
   }, 1000);
 }
 
-// Elabora le risposte ricevute per il round corrente
+// Elabora le risposte ricevute per il round corrente (1 ponto por resposta certa, 0 por errada)
 async function processRoundResults() {
   if (!gameState.activeQuestion || !gameState.activeChallengeId) return;
 
   const currentQ = gameState.activeQuestion;
-  const correctOpt = currentQ.correct_option.toUpperCase();
+  const correctOpt = currentQ.correct_option ? currentQ.correct_option.toString().trim().toUpperCase() : '';
 
   // Cicla su tutte le risposte per registrare nel database
   for (const [teamId, resp] of Object.entries(gameState.responses)) {
-    const isCorrect = (resp.option.toUpperCase() === correctOpt);
-    const pointsAwarded = isCorrect ? (currentQ.points || 100) : 0;
+    const selectedOpt = resp.option ? resp.option.toString().trim().toUpperCase() : '';
+    const isCorrect = (selectedOpt === correctOpt);
+    const pointsAwarded = isCorrect ? 1 : 0;
     
     await db.recordResponse(
       gameState.activeChallengeId,
       currentQ.id,
       parseInt(teamId),
-      resp.option,
+      selectedOpt,
       isCorrect,
       pointsAwarded,
       resp.responseTimeMs || 0
     );
   }
 
-  // Notifica la regia con i dati aggiornati dei punteggi
+  // Notifica la regia e il proiettore con i dati aggiornati dei punteggi (1 pt por cada resposta certa)
   const leaderboard = await db.getChallengeLeaderboard(gameState.activeChallengeId);
   const overall = await db.getOverallTournamentLeaderboard();
   
