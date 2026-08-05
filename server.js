@@ -24,14 +24,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Indirizzo IP e QR Code per rete Intranet
+// Indirizzo IP e QR Code (Rilevamento Cloud / Intranet)
 let localIpAddress = ip.address();
-let serverUrl = `http://${localIpAddress}:${PORT}`;
+let serverUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL || `http://${localIpAddress}:${PORT}`;
 let teamQrCodeUrl = '';
 
-QRCode.toDataURL(`${serverUrl}/team.html`, { margin: 2, scale: 8 }, (err, url) => {
-  if (!err) teamQrCodeUrl = url;
-});
+function generateQrCode() {
+  QRCode.toDataURL(`${serverUrl}/team.html`, { margin: 2, scale: 8 }, (err, url) => {
+    if (!err) teamQrCodeUrl = url;
+  });
+}
+generateQrCode();
 
 // Stato Globale del Gioco in Tempo Reale
 let gameState = {

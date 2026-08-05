@@ -161,12 +161,16 @@
     }
 
     socket.on('game_state_update', (state) => {
+      // Usa l'origine del browser se serverUrl contiene l'IP del container interno
+      const currentOrigin = window.location.origin;
+      const displayUrl = (state.serverUrl && !state.serverUrl.includes('10.31.')) ? state.serverUrl : currentOrigin;
+
       // Titolo sfida
       document.getElementById('active-challenge-title').innerText = 
         (state.activeWeekName ? state.activeWeekName + ' - ' : '') + state.activeChallengeTitle;
       
       document.getElementById('projector-ip-text').innerHTML = 
-        `Accedi dal tuo smartphone: <strong>${state.serverUrl}/team.html</strong>`;
+        `Accedi dal tuo smartphone: <strong>${displayUrl}/team.html</strong>`;
       if (state.teamQrCodeUrl) {
         document.getElementById('projector-qr').src = state.teamQrCodeUrl;
       }
