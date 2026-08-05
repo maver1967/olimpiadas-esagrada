@@ -15,7 +15,7 @@
     <div class="projector-header glass-panel">
       <div style="display: flex; align-items: center; gap: 15px;">
         <h1 class="brand-title" style="font-size: 2.2rem;">🏆 OLIMPIADAS ESAGRADA</h1>
-        <span class="challenge-info" id="active-challenge-title">Sfida in attesa</span>
+        <span class="challenge-info" id="active-challenge-title">Desafio em espera</span>
       </div>
 
       <!-- TIMER CIRCOLARE / NUMERICO 15 SECONDI -->
@@ -31,70 +31,70 @@
       <!-- SCHERMATA ATTESA LOBBY CON QR CODE -->
       <div id="view-lobby" class="glass-panel" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center;">
         <h2 style="font-family: var(--font-heading); font-size: 3rem; color: var(--accent-gold); margin-bottom: 20px;">
-          CONNETTI IL TUO TELEFONO
+          CONECTA O TEU TELEMÓVEL
         </h2>
         <p style="font-size: 1.5rem; margin-bottom: 25px; color: var(--text-muted);">
-          Inquadra il QR Code per iscrivere la tua squadra ed entrare in gara!
+          Digitaliza o QR Code para inscreveres a tua equipa e entrares no jogo!
         </p>
 
         <div style="display: flex; gap: 50px; align-items: center; margin-bottom: 30px;">
           <img id="projector-qr" src="" alt="QR Code" style="width: 250px; height: 250px; border-radius: 20px; border: 6px solid var(--accent-gold); box-shadow: 0 0 40px var(--accent-gold-glow);">
           
           <div style="text-align: left;">
-            <h3 style="font-size: 1.8rem; margin-bottom: 15px; color: #fff;">Squadre Connesse (<span id="connected-count">0</span>):</h3>
+            <h3 style="font-size: 1.8rem; margin-bottom: 15px; color: #fff;">Equipas Conectadas (<span id="connected-count">0</span>):</h3>
             <div id="teams-grid" style="display: flex; flex-wrap: wrap; gap: 12px; max-width: 500px;">
-              <!-- Badge squadre connesse -->
-              <p style="color: var(--text-muted);">In attesa delle squadre...</p>
+              <!-- Badge equipas connesse -->
+              <p style="color: var(--text-muted);">À espera das equipas...</p>
             </div>
           </div>
         </div>
 
         <p style="font-size: 1.2rem; background: rgba(255,255,255,0.05); padding: 12px 25px; border-radius: 30px;" id="projector-ip-text">
-          Oppure digita nel browser del telefono: <strong>http://...</strong>
+          Ou digita no navegador do telemóvel: <strong>http://...</strong>
         </p>
       </div>
 
       <!-- SCHERMATA DOMANDA & ALTERNATIVE (QUESTION_ACTIVE / VOTING_CLOSED / REVEAL_ANSWER) -->
       <div id="view-question" class="question-card-projector glass-panel" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
-          <span class="category-badge" id="q-category">Generale</span>
-          <span style="font-size: 1.4rem; font-weight: 700; color: var(--accent-gold);" id="q-progress">Domanda 1 di 10</span>
+          <span class="category-badge" id="q-category">Geral</span>
+          <span style="font-size: 1.4rem; font-weight: 700; color: var(--accent-gold);" id="q-progress">Pergunta 1 de 10</span>
         </div>
 
         <h2 class="question-text-projector" id="q-text">
-          Caricamento domanda...
+          A carregar pergunta...
         </h2>
 
         <!-- GRID 4 OPZIONI GIGANTI -->
         <div class="options-grid-projector">
           <div class="option-box-projector" id="box-opt-A">
             <div class="option-badge A">A</div>
-            <span id="text-opt-A" style="flex: 1;">Opzione A</span>
+            <span id="text-opt-A" style="flex: 1;">Opção A</span>
           </div>
           <div class="option-box-projector" id="box-opt-B">
             <div class="option-badge B">B</div>
-            <span id="text-opt-B" style="flex: 1;">Opzione B</span>
+            <span id="text-opt-B" style="flex: 1;">Opção B</span>
           </div>
           <div class="option-box-projector" id="box-opt-C">
             <div class="option-badge C">C</div>
-            <span id="text-opt-C" style="flex: 1;">Opzione C</span>
+            <span id="text-opt-C" style="flex: 1;">Opção C</span>
           </div>
           <div class="option-box-projector" id="box-opt-D">
             <div class="option-badge D">D</div>
-            <span id="text-opt-D" style="flex: 1;">Opzione D</span>
+            <span id="text-opt-D" style="flex: 1;">Opção D</span>
           </div>
         </div>
 
         <!-- SEZIONE ESITO SQUADRE (CHI HA INDOVINATO E CHI HA SBAGLIATO) -->
         <div id="team-outcomes-container" style="display: none; margin-top: 25px; background: rgba(15, 23, 42, 0.85); padding: 20px 30px; border-radius: 16px; border: 2px solid var(--accent-gold);">
           <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--accent-gold); margin-bottom: 15px;">
-            📊 RIEPILOGO RISPOSTE SQUADRE
+            📊 RESUMO DAS RESPOSTAS DAS EQUIPAS
           </h3>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left;">
             <!-- Squadre Corrette -->
             <div style="background: rgba(16, 185, 129, 0.15); padding: 15px; border-radius: 12px; border: 1px solid var(--success-green);">
-              <h4 style="color: var(--success-green); font-size: 1.2rem; margin-bottom: 10px;">✅ Hanno Indovinato (+100pt):</h4>
+              <h4 style="color: var(--success-green); font-size: 1.2rem; margin-bottom: 10px;">✅ Acertaram (+100pt):</h4>
               <div id="correct-teams-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
                 <!-- Generato via JS -->
               </div>
@@ -102,7 +102,7 @@
 
             <!-- Squadre Errate / Non risposte -->
             <div style="background: rgba(239, 68, 68, 0.15); padding: 15px; border-radius: 12px; border: 1px solid var(--danger-red);">
-              <h4 style="color: var(--danger-red); font-size: 1.2rem; margin-bottom: 10px;">❌ Hanno Sbagliato / Tempo Scaduto:</h4>
+              <h4 style="color: var(--danger-red); font-size: 1.2rem; margin-bottom: 10px;">❌ Erraram / Tempo Esgotado:</h4>
               <div id="incorrect-teams-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
                 <!-- Generato via JS -->
               </div>
@@ -113,25 +113,25 @@
 
       <!-- BANNER "VOTAZIONE CHIUSA" -->
       <div id="banner-voting-closed" class="voting-closed-banner" style="display: none;">
-        ⏰ SCELTA CHIUSA!
+        ⏰ VOTAÇÃO ENCERRADA!
       </div>
 
       <!-- SCHERMATA CLASSIFICA ROUND & GENERALE -->
       <div id="view-leaderboard" class="glass-panel" style="flex: 1; padding: 40px; display: none; flex-direction: column;">
         <h2 style="font-family: var(--font-heading); font-size: 2.8rem; color: var(--accent-gold); margin-bottom: 20px; text-align: center;" id="leaderboard-title">
-          📊 RISULTATI E CLASSIFICA
+          📊 RESULTADOS E CLASSIFICAÇÃO
         </h2>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex: 1;">
           <!-- Classifica Sfida Corrente -->
           <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 16px;">
-            <h3 style="font-size: 1.6rem; color: var(--primary-blue); margin-bottom: 15px;">🎯 Punteggi Sfida Corrente</h3>
+            <h3 style="font-size: 1.6rem; color: var(--primary-blue); margin-bottom: 15px;">🎯 Pontuação do Desafio Actual</h3>
             <table class="leaderboard-table">
               <thead>
                 <tr>
                   <th>Pos</th>
-                  <th>Squadra</th>
-                  <th style="text-align: right;">Punti</th>
+                  <th>Equipa</th>
+                  <th style="text-align: right;">Pontos</th>
                 </tr>
               </thead>
               <tbody id="tbody-challenge-leaderboard">
@@ -142,13 +142,13 @@
 
           <!-- Classifica Generale del Torneo -->
           <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 16px; border: 2px solid var(--accent-gold);">
-            <h3 style="font-size: 1.6rem; color: var(--accent-gold); margin-bottom: 15px;">👑 Classifica Generale Torneo</h3>
+            <h3 style="font-size: 1.6rem; color: var(--accent-gold); margin-bottom: 15px;">👑 Classificação Geral do Torneio</h3>
             <table class="leaderboard-table">
               <thead>
                 <tr>
                   <th>Pos</th>
-                  <th>Squadra</th>
-                  <th style="text-align: right;">Punti Totali</th>
+                  <th>Equipa</th>
+                  <th style="text-align: right;">Pontos Totais</th>
                 </tr>
               </thead>
               <tbody id="tbody-overall-leaderboard">

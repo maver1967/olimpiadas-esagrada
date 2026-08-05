@@ -13,17 +13,17 @@
     
     <!-- LOGIN ADMIN PIN MODAL -->
     <div id="admin-login-screen" class="glass-panel hero-container" style="max-width: 450px;">
-      <h1 class="brand-title" style="font-size: 2rem; margin-bottom: 15px;">🔑 Accesso Regia Admin</h1>
+      <h1 class="brand-title" style="font-size: 2rem; margin-bottom: 15px;">🔑 Acesso à Régia Admin</h1>
       <p style="color: var(--text-muted); margin-bottom: 20px;">
-        Puoi accedere da qualsiasi computer o tablet inserendo il PIN dell'organizzatore.
+        Podes aceder a partir de qualquer computador ou telemóvel introduzindo o PIN do organizador.
       </p>
 
       <form id="form-login">
         <div class="form-group">
-          <label for="admin-pin">PIN Organizzatore:</label>
-          <input type="password" id="admin-pin" class="form-input" placeholder="Es. 1234" required autofocus style="text-align: center; font-size: 1.5rem; letter-spacing: 4px;">
+          <label for="admin-pin">PIN do Organizador:</label>
+          <input type="password" id="admin-pin" class="form-input" placeholder="Ex. 1234" required autofocus style="text-align: center; font-size: 1.5rem; letter-spacing: 4px;">
         </div>
-        <button type="submit" class="btn-primary" style="width: 100%;">Accedi al Pannello</button>
+        <button type="submit" class="btn-primary" style="width: 100%;">Entrar no Painel</button>
       </form>
     </div>
 
@@ -33,14 +33,14 @@
       <!-- HEADER DASHBOARD -->
       <div class="glass-panel" style="padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
         <div>
-          <h1 class="brand-title" style="font-size: 2rem;">🎛️ Regia Olimpiadas ESagrada</h1>
-          <p style="color: var(--text-muted); font-size: 0.95rem;">Pannello di controllo da qualsiasi dispositivo intranet</p>
+          <h1 class="brand-title" style="font-size: 2rem;">🎛️ Régia Olimpiadas ESagrada</h1>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">Painel de controlo a partir de qualquer dispositivo</p>
         </div>
         <div style="display: flex; gap: 15px; align-items: center;">
           <span style="background: rgba(16, 185, 129, 0.2); color: var(--success-green); padding: 6px 14px; border-radius: 20px; font-weight: 700;">
-            Autenticato
+            Autenticado
           </span>
-          <button onclick="logoutAdmin()" class="btn-danger" style="padding: 6px 14px;">Esci</button>
+          <button onclick="logoutAdmin()" class="btn-danger" style="padding: 6px 14px;">Sair</button>
         </div>
       </div>
 
@@ -52,54 +52,54 @@
           
           <!-- SELEZIONE SETTIMANA & SFIDA -->
           <div class="glass-panel" style="padding: 20px;">
-            <h3 style="color: var(--accent-gold); margin-bottom: 15px; font-size: 1.3rem;">📅 Settimana & Sfida Attiva</h3>
+            <h3 style="color: var(--accent-gold); margin-bottom: 15px; font-size: 1.3rem;">📅 Semana & Desafio Activo</h3>
             
             <div class="form-group">
-              <label for="select-challenge">Seleziona la sfida da proiettare:</label>
+              <label for="select-challenge">Seleciona o desafio a projectar:</label>
               <select id="select-challenge" class="form-input" onchange="onChallengeSelected()">
                 <!-- Opzioni popolate via API -->
               </select>
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 10px;">
-              <button onclick="createWeekPrompt()" class="btn-primary" style="flex: 1; font-size: 0.85rem;">+ Nuova Settimana</button>
-              <button onclick="createChallengePrompt()" class="btn-primary" style="flex: 1; font-size: 0.85rem;">+ Nuova Sfida</button>
+              <button onclick="createWeekPrompt()" class="btn-primary" style="flex: 1; font-size: 0.85rem;">+ Nova Semana</button>
+              <button onclick="createChallengePrompt()" class="btn-primary" style="flex: 1; font-size: 0.85rem;">+ Novo Desafio</button>
             </div>
           </div>
 
           <!-- CONTROLLORE LIVE MATCH -->
           <div class="glass-panel" style="padding: 20px; border: 2px solid var(--accent-gold);">
-            <h3 style="color: var(--accent-gold); margin-bottom: 15px; font-size: 1.3rem;">🚀 Controller del Gioco Live</h3>
+            <h3 style="color: var(--accent-gold); margin-bottom: 15px; font-size: 1.3rem;">🚀 Controlo do Jogo em Directo</h3>
             
             <div style="background: rgba(15,23,42,0.8); padding: 12px; border-radius: 10px; margin-bottom: 15px;">
-              <p>Stato Attuale: <strong id="admin-status-display" style="color: var(--accent-gold);">LOBBY</strong></p>
-              <p>Domanda Corrente: <strong id="admin-q-progress">0/0</strong></p>
+              <p>Estado Actual: <strong id="admin-status-display" style="color: var(--accent-gold);">LOBBY</strong></p>
+              <p>Pergunta Actual: <strong id="admin-q-progress">0/0</strong></p>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <button onclick="openQrModalAdmin()" class="btn-primary" style="background: linear-gradient(135deg, #06b6d4, #0284c7); font-size: 1rem; padding: 12px;">
-                📱 MOSTRA QR CODE SQUADRE
+                📱 MOSTRAR QR CODE EQUIPAS
               </button>
 
               <button onclick="socketStartQuestion()" class="btn-success" style="font-size: 1.1rem; padding: 14px;">
-                ▶️ AVVIA DOMANDA (Timer 15s)
+                ▶️ INICIAR PERGUNTA (Timer 15s)
               </button>
               
               <div style="display: flex; gap: 10px;">
-                <button onclick="socketPrevQuestion()" class="btn-primary" style="flex: 1;">◀️ Prec.</button>
-                <button onclick="socketNextQuestion()" class="btn-primary" style="flex: 1;">Succ. ▶️</button>
+                <button onclick="socketPrevQuestion()" class="btn-primary" style="flex: 1;">◀️ Ant.</button>
+                <button onclick="socketNextQuestion()" class="btn-primary" style="flex: 1;">Seg. ▶️</button>
               </div>
 
               <button onclick="socketShowResults()" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
-                📊 Mostra Punteggi Round
+                📊 Mostrar Pontuação da Ronda
               </button>
 
               <button onclick="socketShowOverall()" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                👑 Mostra Classifica Generale Torneo
+                👑 Mostrar Classificação Geral do Torneio
               </button>
 
               <button onclick="socketShowLobby()" class="btn-primary" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
-                📺 Torna a Lobby con QR sul Proiettore
+                📺 Voltar ao Lobby com QR no Projector
               </button>
             </div>
           </div>
@@ -109,21 +109,21 @@
         <!-- COLONNA DESTRA: PRECARICAMENTO & RIORDINAMENTO DOMANDE -->
         <div class="glass-panel" style="padding: 25px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="color: var(--text-main); font-size: 1.4rem;">📝 Domande Precaricate per la Sfida</h3>
+            <h3 style="color: var(--text-main); font-size: 1.4rem;">📝 Perguntas Carregadas para o Desafio</h3>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <button onclick="openGoogleSheetsImportModal()" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #047857);">
-                📊 Importa da Google Sheets
+                📊 Importar do Google Sheets
               </button>
               <button onclick="exportToGoogleSheetsCSV()" class="btn-primary" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
-                📥 Scarica CSV per Google Sheets
+                📥 Baixar CSV para Google Sheets
               </button>
-              <button onclick="openNewQuestionModal()" class="btn-success">+ Aggiungi Domanda</button>
+              <button onclick="openNewQuestionModal()" class="btn-success">+ Adicionar Pergunta</button>
             </div>
           </div>
 
           <!-- LISTA DOMANDE RIORDINABILE -->
           <div id="questions-list-container">
-            <p style="color: var(--text-muted);">Seleziona o crea una sfida per visualizzare e riordinare le domande.</p>
+            <p style="color: var(--text-muted);">Seleciona ou cria um desafio para veres e reordenares as perguntas.</p>
           </div>
         </div>
 
@@ -135,63 +135,63 @@
   <!-- MODAL EDIT/NUOVA DOMANDA -->
   <div id="modal-question" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center;">
     <div class="glass-panel" style="max-width: 650px; width: 90%; padding: 30px; max-height: 90vh; overflow-y: auto;">
-      <h2 id="modal-q-title" style="margin-bottom: 20px; color: var(--accent-gold);">Nuova Domanda</h2>
+      <h2 id="modal-q-title" style="margin-bottom: 20px; color: var(--accent-gold);">Nova Pergunta</h2>
 
       <form id="form-question">
         <input type="hidden" id="q-id">
         
         <div class="form-group">
-          <label>Categoria / Materia:</label>
-          <input type="text" id="q-input-category" class="form-input" placeholder="Es. Storia, Geografia, Scienza..." required>
+          <label>Categoria / Matéria:</label>
+          <input type="text" id="q-input-category" class="form-input" placeholder="Ex. História, Geografia, Ciência..." required>
         </div>
 
         <div class="form-group">
-          <label>Testo della Domanda (Ben visibile):</label>
-          <textarea id="q-input-text" class="form-input" rows="3" placeholder="Scrivi il testo della domanda..." required></textarea>
+          <label>Texto da Pergunta (Bem visível):</label>
+          <textarea id="q-input-text" class="form-input" rows="3" placeholder="Escreve o texto da pergunta..." required></textarea>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
           <div class="form-group">
-            <label style="color: var(--color-a);">Opzione A:</label>
+            <label style="color: var(--color-a);">Opção A:</label>
             <input type="text" id="q-input-a" class="form-input" required>
           </div>
           <div class="form-group">
-            <label style="color: var(--color-b);">Opzione B:</label>
+            <label style="color: var(--color-b);">Opção B:</label>
             <input type="text" id="q-input-b" class="form-input" required>
           </div>
           <div class="form-group">
-            <label style="color: var(--color-c);">Opzione C:</label>
+            <label style="color: var(--color-c);">Opção C:</label>
             <input type="text" id="q-input-c" class="form-input" required>
           </div>
           <div class="form-group">
-            <label style="color: var(--color-d);">Opzione D:</label>
+            <label style="color: var(--color-d);">Opção D:</label>
             <input type="text" id="q-input-d" class="form-input" required>
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
           <div class="form-group">
-            <label>Risposta Corretta:</label>
+            <label>Resposta Certa:</label>
             <select id="q-input-correct" class="form-input" required>
-              <option value="A">Opzione A</option>
-              <option value="B">Opzione B</option>
-              <option value="C">Opzione C</option>
-              <option value="D">Opzione D</option>
+              <option value="A">Opção A</option>
+              <option value="B">Opção B</option>
+              <option value="C">Opção C</option>
+              <option value="D">Opção D</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Punti:</label>
+            <label>Pontos:</label>
             <input type="number" id="q-input-points" class="form-input" value="100">
           </div>
           <div class="form-group">
-            <label>Tempo (Secondi):</label>
+            <label>Tempo (Segundos):</label>
             <input type="number" id="q-input-time" class="form-input" value="15">
           </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
-          <button type="button" onclick="closeQuestionModal()" style="padding: 10px 20px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid #aaa; cursor: pointer;">Annulla</button>
-          <button type="submit" class="btn-success">Salva Domanda</button>
+          <button type="button" onclick="closeQuestionModal()" style="padding: 10px 20px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid #aaa; cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-success">Salvar Pergunta</button>
         </div>
       </form>
     </div>
@@ -200,21 +200,21 @@
   <!-- MODAL IMPORTAZIONE DA GOOGLE SHEETS -->
   <div id="modal-sheets-import" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 210; align-items: center; justify-content: center;">
     <div class="glass-panel" style="max-width: 600px; width: 90%; padding: 30px;">
-      <h2 style="margin-bottom: 15px; color: var(--success-green);">📊 Importa Domande da Google Sheets</h2>
+      <h2 style="margin-bottom: 15px; color: var(--success-green);">📊 Importar Perguntas do Google Sheets</h2>
       <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.4;">
-        Incolla il link del tuo foglio Google Sheets (pubblicato sul Web o in formato CSV). Il foglio deve contenere le colonne:<br>
-        <code style="color: var(--accent-gold); font-size: 0.85rem;">Categoria, Domanda, OpzioneA, OpzioneB, OpzioneC, OpzioneD, RispostaEsatta, Punti, Tempo</code>
+        Cola o link da tua folha do Google Sheets (publicada na Web ou em formato CSV). A folha deve conter as colunas:<br>
+        <code style="color: var(--accent-gold); font-size: 0.85rem;">Categoria, Pergunta, OpcaoA, OpcaoB, OpcaoC, OpcaoD, RespostaCerta, Pontos, Tempo</code>
       </p>
 
       <form id="form-sheets-import">
         <div class="form-group">
-          <label for="sheets-url-input">Link Google Sheets (URL o CSV):</label>
+          <label for="sheets-url-input">Link do Google Sheets (URL ou CSV):</label>
           <input type="url" id="sheets-url-input" class="form-input" placeholder="https://docs.google.com/spreadsheets/d/..." required>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
-          <button type="button" onclick="closeGoogleSheetsModal()" style="padding: 10px 20px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid #aaa; cursor: pointer;">Annulla</button>
-          <button type="submit" class="btn-success">Importa Domande</button>
+          <button type="button" onclick="closeGoogleSheetsModal()" style="padding: 10px 20px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid #aaa; cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-success">Importar Perguntas</button>
         </div>
       </form>
     </div>
@@ -223,18 +223,18 @@
   <!-- MODAL VISUALIZZAZIONE QR CODE IN ADMIN -->
   <div id="modal-qr-admin" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 220; align-items: center; justify-content: center;">
     <div class="glass-panel" style="max-width: 500px; width: 90%; padding: 30px; text-align: center;">
-      <h2 style="margin-bottom: 15px; color: var(--accent-gold);">📱 QR Code Connessione Squadre</h2>
+      <h2 style="margin-bottom: 15px; color: var(--accent-gold);">📱 QR Code de Conexão das Equipas</h2>
       <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">
-        Fai inquadrare questo QR Code dallo smartphone dei partecipanti per farli registrare subito:
+        Faz com que os participantes digitalizem este QR Code a partir do seu telemóvel para se registarem:
       </p>
 
-      <img id="admin-qr-img" src="" alt="QR Code Squadre" style="width: 240px; height: 240px; border-radius: 16px; border: 4px solid var(--accent-gold); box-shadow: 0 0 30px var(--accent-gold-glow); margin-bottom: 15px;">
+      <img id="admin-qr-img" src="" alt="QR Code Equipas" style="width: 240px; height: 240px; border-radius: 16px; border: 4px solid var(--accent-gold); box-shadow: 0 0 30px var(--accent-gold-glow); margin-bottom: 15px;">
 
       <p id="admin-qr-link" style="font-size: 1rem; color: #fff; background: rgba(255,255,255,0.08); padding: 10px; border-radius: 8px; word-break: break-all; margin-bottom: 20px;">
-        Caricamento link...
+        A carregar link...
       </p>
 
-      <button onclick="closeQrModalAdmin()" class="btn-primary" style="width: 100%; padding: 12px;">Chiudi</button>
+      <button onclick="closeQrModalAdmin()" class="btn-primary" style="width: 100%; padding: 12px;">Fechar</button>
     </div>
   </div>
 

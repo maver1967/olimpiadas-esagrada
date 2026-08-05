@@ -40,7 +40,7 @@ generateQrCode();
 let gameState = {
   status: 'LOBBY', // 'LOBBY', 'QUESTION_ACTIVE', 'VOTING_CLOSED', 'REVEAL_ANSWER', 'ROUND_RESULTS', 'TOURNAMENT_LEADERBOARD'
   activeChallengeId: null,
-  activeChallengeTitle: 'Nessuna sfida attiva',
+  activeChallengeTitle: 'Nenhum desafio activo',
   activeWeekId: null,
   activeWeekName: '',
   questions: [],

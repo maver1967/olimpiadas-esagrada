@@ -105,14 +105,14 @@ db.serialize(() => {
   // Inserisce una settimana iniziale predefinita se il database è nuovo
   db.get('SELECT COUNT(*) as count FROM weeks', (err, row) => {
     if (!err && row.count === 0) {
-      db.run('INSERT INTO weeks (number, name) VALUES (?, ?)', [1, 'Settimana 1']);
-      db.run('INSERT INTO challenges (week_id, title) VALUES (?, ?)', [1, 'Sfida 1']);
+      db.run('INSERT INTO weeks (number, name) VALUES (?, ?)', [1, 'Semana 1']);
+      db.run('INSERT INTO challenges (week_id, title) VALUES (?, ?)', [1, 'Desafio 1']);
       
       // Inseriamo alcune domande dimostrative per test immediato
       const demoQuestions = [
-        [1, 1, 'Geografia', 'Qual è la capitale del Mozambico?', 'Beira', 'Maputo', 'Nampula', 'Pemba', 'B', 100, 15],
-        [1, 2, 'Scienza', 'Qual è la formula chimica dell\'acqua?', 'H2O', 'CO2', 'NaCl', 'O2', 'A', 100, 15],
-        [1, 3, 'Storia & Cultura', 'Quanti colori ha la bandiera del Mozambico?', '3', '4', '5', '6', 'C', 100, 15]
+        [1, 1, 'Geografia', 'Qual é a capital de Moçambique?', 'Beira', 'Maputo', 'Nampula', 'Pemba', 'B', 100, 15],
+        [1, 2, 'Ciência', 'Qual é a fórmula química da água?', 'H2O', 'CO2', 'NaCl', 'O2', 'A', 100, 15],
+        [1, 3, 'História & Cultura', 'Quantas cores tem a bandeira de Moçambique?', '3', '4', '5', '6', 'C', 100, 15]
       ];
       const stmt = db.prepare(`
         INSERT INTO questions 
@@ -121,7 +121,7 @@ db.serialize(() => {
       `);
       demoQuestions.forEach(q => stmt.run(q));
       stmt.finalize();
-      console.log('Dati iniziali dimostrativi creati con successo.');
+      console.log('Dados iniciais de demonstração criados com sucesso.');
     }
   });
 });

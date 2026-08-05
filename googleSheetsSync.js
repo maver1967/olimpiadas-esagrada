@@ -115,7 +115,7 @@ function pushToGoogleSheetWebhook(webhookUrl, dataPayload) {
 
 // Genera CSV per esportare i punteggi generali del torneo
 function generateOverallCSV(leaderboardData) {
-  let csv = "Posizione,Squadra,Colore,Punti Totali\n";
+  let csv = "Posicao,Equipa,Cor,Pontos Totais\n";
   leaderboardData.forEach((row, index) => {
     csv += `"${index + 1}","${row.name.replace(/"/g, '""')}","${row.color}",${row.total_score}\n`;
   });

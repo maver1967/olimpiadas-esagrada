@@ -15,16 +15,16 @@
     <!-- REGISTRAZIONE SQUADRA -->
     <div id="screen-register" class="team-registration-card glass-panel" style="margin-top: 30px;">
       <h1 class="brand-title" style="font-size: 2.2rem; margin-bottom: 10px;">🏆 Olimpiadas ESagrada</h1>
-      <p style="color: var(--text-muted); margin-bottom: 25px;">Iscrivi il tuo gruppo al gioco!</p>
+      <p style="color: var(--text-muted); margin-bottom: 25px;">Inscreve a tua equipa no jogo!</p>
 
       <form id="form-register">
         <div class="form-group">
-          <label for="team-name">Nome della Squadra / Gruppo:</label>
-          <input type="text" id="team-name" class="form-input" placeholder="Es. I Filosofi, Gruppo A..." required maxlength="25">
+          <label for="team-name">Nome da Equipa / Grupo:</label>
+          <input type="text" id="team-name" class="form-input" placeholder="Ex. Os Filósofos, Grupo A..." required maxlength="25">
         </div>
 
         <div class="form-group">
-          <label>Scegli il Colore del Gruppo:</label>
+          <label>Escolhe a Cor do Grupo:</label>
           <div class="color-picker-grid" id="color-picker">
             <div class="color-option selected" data-color="#ef4444" style="background-color: #ef4444;"></div>
             <div class="color-option" data-color="#3b82f6" style="background-color: #3b82f6;"></div>
@@ -40,7 +40,7 @@
         </div>
 
         <button type="submit" class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.2rem; margin-top: 15px;">
-          Entra in Gara 🚀
+          Entrar na Competição 🚀
         </button>
       </form>
     </div>
@@ -48,11 +48,11 @@
     <!-- SCHERMATA ATTESA IN LOBBY -->
     <div id="screen-lobby" class="glass-panel" style="display: none; text-align: center; padding: 40px 20px; margin-top: 30px;">
       <div id="my-team-badge" class="team-badge-pill" style="font-size: 1.4rem; padding: 10px 20px; margin-bottom: 20px;">
-        Squadra Registrata
+        Equipa Registada
       </div>
-      <h2 style="font-family: var(--font-heading); margin-bottom: 15px;">Sei pronto! 🎉</h2>
+      <h2 style="font-family: var(--font-heading); margin-bottom: 15px;">Estás pronto! 🎉</h2>
       <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.5;">
-        Guarda il proiettore. Quando l'organizzatore avvierà la domanda, appariranno qui i pulsanti per rispondere.
+        Olha para o projector. Quando o organizador iniciar a pergunta, aparecerão aqui os botões para responder.
       </p>
       <div style="margin-top: 30px; font-size: 3rem;" class="pulse-animation">⏳</div>
     </div>
@@ -62,11 +62,11 @@
       <!-- Header della domanda -->
       <div class="glass-panel" style="padding: 15px; text-align: center; margin-bottom: 15px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span id="team-q-category" style="font-weight: 700; color: var(--primary-blue); font-size: 0.9rem;">Generale</span>
+          <span id="team-q-category" style="font-weight: 700; color: var(--primary-blue); font-size: 0.9rem;">Geral</span>
           <span id="team-timer" style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 900; color: var(--accent-gold);">⏰ 15s</span>
         </div>
         <p id="team-q-text" style="font-size: 1.15rem; font-weight: 600; line-height: 1.35; color: #fff;">
-          Testo domanda...
+          Texto da pergunta...
         </p>
       </div>
 
@@ -99,9 +99,9 @@
     <!-- REVEAL RISULTATO DELLA SQUADRA -->
     <div id="screen-result" class="glass-panel" style="display: none; text-align: center; padding: 35px 20px; margin-top: 30px;">
       <div id="result-icon" style="font-size: 4rem; margin-bottom: 15px;">🎉</div>
-      <h2 id="result-title" style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 10px;">Risposta Corretta!</h2>
-      <p id="result-subtitle" style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 20px;">+100 punti alla tua squadra</p>
-      <p style="font-size: 0.95rem;">Guarda il proiettore per il punteggio aggiornato.</p>
+      <h2 id="result-title" style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 10px;">Resposta Certa!</h2>
+      <p id="result-subtitle" style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 20px;">+100 pontos para a tua equipa</p>
+      <p style="font-size: 0.95rem;">Olha para o projector para veres a pontuação actualizada.</p>
     </div>
 
   </div>
@@ -169,7 +169,7 @@
       statusBanner.style.display = 'block';
       statusBanner.style.background = 'rgba(59, 130, 246, 0.3)';
       statusBanner.style.color = '#fff';
-      statusBanner.innerText = `Hai selezionato l'opzione ${letter}. Puoi cambiare finché il tempo non scade!`;
+      statusBanner.innerText = `Selecionaste a opção ${letter}. Podes alterar até o tempo terminar!`;
     }
 
     socket.on('vote_accepted', (data) => {
@@ -201,7 +201,7 @@
           document.querySelectorAll('.team-btn-option').forEach(b => b.disabled = false);
 
           if (state.activeQuestion) {
-            document.getElementById('team-q-category').innerText = state.activeQuestion.category || 'Generale';
+            document.getElementById('team-q-category').innerText = state.activeQuestion.category || 'Geral';
             document.getElementById('team-q-text').innerText = state.activeQuestion.text;
             document.getElementById('team-opt-text-A').innerText = state.activeQuestion.option_a;
             document.getElementById('team-opt-text-B').innerText = state.activeQuestion.option_b;
@@ -215,7 +215,7 @@
           const statusBanner = document.getElementById('vote-status-banner');
           statusBanner.style.display = 'block';
           statusBanner.style.background = 'rgba(239, 68, 68, 0.4)';
-          statusBanner.innerText = '⏰ Tempo scaduto! Votazione chiusa.';
+          statusBanner.innerText = '⏰ Tempo esgotado! Votação encerrada.';
         }
         else if (state.status === 'REVEAL_ANSWER') {
           screenPlay.style.display = 'none';
@@ -230,19 +230,19 @@
 
           if (userOpt && userOpt === correctOpt) {
             rIcon.innerText = '🎉';
-            rTitle.innerText = 'Risposta Esatta!';
+            rTitle.innerText = 'Resposta Certa!';
             rTitle.style.color = 'var(--success-green)';
-            rSub.innerText = `Bravi! Avete indovinato l'opzione ${correctOpt}.`;
+            rSub.innerText = `Parabéns! Acertaram na opção ${correctOpt}.`;
           } else if (userOpt) {
             rIcon.innerText = '❌';
-            rTitle.innerText = 'Risposta Sbagliata!';
+            rTitle.innerText = 'Resposta Errada!';
             rTitle.style.color = 'var(--danger-red)';
-            rSub.innerText = `Avete scelto ${userOpt}. La risposta corretta era ${correctOpt}.`;
+            rSub.innerText = `Escolheram a opção ${userOpt}. A resposta certa era ${correctOpt}.`;
           } else {
             rIcon.innerText = '⏱️';
-            rTitle.innerText = 'Tempo Scaduto!';
+            rTitle.innerText = 'Tempo Esgotado!';
             rTitle.style.color = 'var(--accent-gold)';
-            rSub.innerText = `Non avete inviato in tempo. La risposta era ${correctOpt}.`;
+            rSub.innerText = `Não enviaram a tempo. A resposta era ${correctOpt}.`;
           }
         }
       }
@@ -254,6 +254,8 @@
 
     socket.on('timer_tick', (data) => {
       document.getElementById('team-timer').innerText = `⏰ ${data.seconds}s`;
+    });
+  </script>seconds}s`;
     });
   </script>
 </body>
