@@ -111,6 +111,9 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
             <h3 style="color: var(--text-main); font-size: 1.4rem;">📝 Perguntas Carregadas para o Desafio</h3>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button onclick="openAutoGenerateModal()" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                ✨ Gerador Automático de Perguntas
+              </button>
               <button onclick="openGoogleSheetsImportModal()" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #047857);">
                 📊 Importar do Google Sheets
               </button>
@@ -197,6 +200,48 @@
     </div>
   </div>
 
+  <!-- MODAL GERADOR AUTOMÁTICO DE PERGUNTAS -->
+  <div id="modal-auto-generate" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 215; align-items: center; justify-content: center;">
+    <div class="glass-panel" style="max-width: 600px; width: 90%; padding: 30px;">
+      <h2 style="margin-bottom: 15px; color: var(--accent-gold);">✨ Gerador Automático de Perguntas</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">
+        Escolhe a disciplina, o nível de dificuldade (classe/idade dos concorrentes) e a quantidade de perguntas a gerar para este desafio:
+      </p>
+
+      <form id="form-auto-generate">
+        <div class="form-group">
+          <label>Disciplina / Matéria:</label>
+          <select id="gen-subject" class="form-input" required>
+            <option value="Filosofia">Filosofia</option>
+            <option value="Geografia de Moçambique">Geografia de Moçambique</option>
+            <option value="História & Cultura">História & Cultura de Moçambique</option>
+            <option value="Biologia & Ciências">Biologia & Ciências</option>
+            <option value="Ética & Cidadania">Ética & Cidadania</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Nível de Dificuldade / Classe:</label>
+          <select id="gen-difficulty" class="form-input" required>
+            <option value="Fácil">Fácil (10ª Classe / 15-16 anos)</option>
+            <option value="Médio" selected>Médio (11ª Classe / 16-17 anos)</option>
+            <option value="Difícil">Difícil (12ª Classe / Pré-Universitária)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Quantidade de Perguntas:</label>
+          <input type="number" id="gen-count" class="form-input" value="3" min="1" max="10" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
+          <button type="button" onclick="closeAutoGenerateModal()" style="padding: 10px 20px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid #aaa; cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706);">✨ Gerar Perguntas Agora</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL IMPORTAZIONE DA GOOGLE SHEETS -->
   <div id="modal-sheets-import" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 210; align-items: center; justify-content: center;">
     <div class="glass-panel" style="max-width: 600px; width: 90%; padding: 30px;">
@@ -264,6 +309,42 @@
     function socketShowLobby() {
       socket.emit('admin_show_lobby', { pin: adminPin });
     }
+
+    // Modal e Logica Gerador Automático de Perguntas
+    function openAutoGenerateModal() {
+      const challengeId = document.getElementById('select-challenge').value;
+      if (!challengeId) return alert('Seleciona primeiro um desafio!');
+      document.getElementById('modal-auto-generate').style.display = 'flex';
+    }
+
+    function closeAutoGenerateModal() {
+      document.getElementById('modal-auto-generate').style.display = 'none';
+    }
+
+    document.getElementById('form-auto-generate').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const challengeId = document.getElementById('select-challenge').value;
+      const subject = document.getElementById('gen-subject').value;
+      const difficulty = document.getElementById('gen-difficulty').value;
+      const count = parseInt(document.getElementById('gen-count').value) || 3;
+
+      fetch('/api/admin/questions/auto-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challenge_id: challengeId, subject, difficulty, count })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(`✨ Geradas com sucesso ${data.count} perguntas de ${subject} (${difficulty})!`);
+          closeAutoGenerateModal();
+          loadQuestionsForChallenge(challengeId);
+        } else {
+          alert('Erro: ' + (data.error || 'Não foi possível gerar perguntas'));
+        }
+      })
+      .catch(err => alert('Erro de conexão: ' + err.message));
+    });
   </script>
 
   <script>

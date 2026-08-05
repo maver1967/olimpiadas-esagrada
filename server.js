@@ -199,6 +199,40 @@ function buildPublicGameState() {
   };
 }
 
+// --- GERADOR AUTOMÁTICO DE PERGUNTAS POR DISCIPLINA & NÍVEL ---
+const questionGenerator = require('./questionBankGenerator');
+
+app.post('/api/admin/questions/auto-generate', async (req, res) => {
+  const { challenge_id, subject, difficulty, count } = req.body;
+  try {
+    const generated = questionGenerator.generateQuestions(subject, difficulty, count || 5);
+    if (generated.length === 0) {
+      return res.status(400).json({ error: "Nenhuma pergunta encontrada para esta disciplina/nível." });
+    }
+
+    let order = 1;
+    for (let q of generated) {
+      await db.saveQuestion({
+        challenge_id,
+        question_order: order++,
+        category: subject,
+        text: q.text,
+        option_a: q.a,
+        option_b: q.b,
+        option_c: q.c,
+        option_d: q.d,
+        correct_option: q.correct,
+        points: 100,
+        time_limit: 15
+      });
+    }
+
+    res.json({ success: true, count: generated.length });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao gerar perguntas: " + err.message });
+  }
+});
+
 // --- INTEGRAZIONE GOOGLE SHEETS ---
 const googleSheets = require('./googleSheetsSync');
 
