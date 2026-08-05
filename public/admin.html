@@ -320,7 +320,7 @@
     // Modal e Logica Gerador Automático de Perguntas
     function openAutoGenerateModal() {
       const challengeId = document.getElementById('select-challenge').value;
-      if (!challengeId) return alert('Seleciona primeiro um desafio!');
+      if (!challengeId) return;
       document.getElementById('modal-auto-generate').style.display = 'flex';
     }
 
@@ -343,14 +343,12 @@
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          alert(`✨ Geradas com sucesso ${data.count} perguntas de ${subject} (${difficulty})!`);
+          // Seleção direta sem popup alert
           closeAutoGenerateModal();
           loadQuestionsForChallenge(challengeId);
-        } else {
-          alert('Erro: ' + (data.error || 'Não foi possível gerar perguntas'));
         }
       })
-      .catch(err => alert('Erro de conexão: ' + err.message));
+      .catch(err => console.error(err));
     });
   </script>
 
@@ -376,7 +374,7 @@
           localStorage.setItem('esagrada_admin_pin', pin);
           initAdminDashboard();
         } else {
-          alert('PIN errato!');
+          document.getElementById('admin-pin').style.borderColor = 'var(--danger-red)';
         }
       });
     });
@@ -540,36 +538,36 @@
     });
 
     function deleteQuestion(id) {
-      if (!confirm('Eliminare questa domanda?')) return;
       const challengeId = document.getElementById('select-challenge').value;
       fetch(`/api/admin/questions/${id}`, { method: 'DELETE' })
         .then(() => loadQuestionsForChallenge(challengeId));
     }
 
     function createWeekPrompt() {
-      const name = prompt('Inserisci il nome della nuova Settimana (es. Settimana 2):');
-      if (!name) return;
-      fetch('/api/admin/weeks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ number: Date.now(), name })
-      }).then(() => loadWeeksAndChallenges());
+      fetch('/api/admin/weeks')
+        .then(res => res.json())
+        .then(weeks => {
+          const nextWeekNum = weeks.length + 1;
+          fetch('/api/admin/weeks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ number: Date.now(), name: `Semana ${nextWeekNum}` })
+          }).then(() => loadWeeksAndChallenges());
+        });
     }
 
     function createChallengePrompt() {
-      const challengeTitle = prompt('Inserisci il titolo della sfida (es. Sfida Matematica):');
-      if (!challengeTitle) return;
       const select = document.getElementById('select-challenge');
-      const challengeId = select.value;
-      // Recupera week_id dalla prima selezione
       fetch('/api/admin/weeks')
         .then(res => res.json())
         .then(weeks => {
           if (weeks.length > 0) {
+            const currentWeek = weeks[weeks.length - 1];
+            const nextChallengeNum = (currentWeek.challenges ? currentWeek.challenges.length : 0) + 1;
             fetch('/api/admin/challenges', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ week_id: weeks[weeks.length - 1].id, title: challengeTitle })
+              body: JSON.stringify({ week_id: currentWeek.id, title: `Desafio ${nextChallengeNum}` })
             }).then(() => loadWeeksAndChallenges());
           }
         });
@@ -592,13 +590,13 @@
       socket.emit('admin_show_overall', { pin: adminPin });
     }
 
-    socket.on('admin_error', (msg) => alert('ERRORE: ' + msg));
-    socket.on('admin_info', (msg) => alert('INFO: ' + msg));
+    socket.on('admin_error', (msg) => console.error('ADMIN ERROR:', msg));
+    socket.on('admin_info', (msg) => console.log('ADMIN INFO:', msg));
 
     socket.on('game_state_update', (state) => {
       document.getElementById('admin-status-display').innerText = state.status;
       document.getElementById('admin-q-progress').innerText = 
-        `${state.currentQuestionIndex + 1} di ${state.totalQuestions}`;
+        `${state.currentQuestionIndex + 1} de ${state.totalQuestions}`;
     });
   </script>
 </body>
