@@ -77,6 +77,10 @@
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button onclick="openQrModalAdmin()" class="btn-primary" style="background: linear-gradient(135deg, #06b6d4, #0284c7); font-size: 1rem; padding: 12px;">
+                📱 MOSTRA QR CODE SQUADRE
+              </button>
+
               <button onclick="socketStartQuestion()" class="btn-success" style="font-size: 1.1rem; padding: 14px;">
                 ▶️ AVVIA DOMANDA (Timer 15s)
               </button>
@@ -92,6 +96,10 @@
 
               <button onclick="socketShowOverall()" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
                 👑 Mostra Classifica Generale Torneo
+              </button>
+
+              <button onclick="socketShowLobby()" class="btn-primary" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                📺 Torna a Lobby con QR sul Proiettore
               </button>
             </div>
           </div>
@@ -212,42 +220,49 @@
     </div>
   </div>
 
+  <!-- MODAL VISUALIZZAZIONE QR CODE IN ADMIN -->
+  <div id="modal-qr-admin" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 220; align-items: center; justify-content: center;">
+    <div class="glass-panel" style="max-width: 500px; width: 90%; padding: 30px; text-align: center;">
+      <h2 style="margin-bottom: 15px; color: var(--accent-gold);">📱 QR Code Connessione Squadre</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">
+        Fai inquadrare questo QR Code dallo smartphone dei partecipanti per farli registrare subito:
+      </p>
+
+      <img id="admin-qr-img" src="" alt="QR Code Squadre" style="width: 240px; height: 240px; border-radius: 16px; border: 4px solid var(--accent-gold); box-shadow: 0 0 30px var(--accent-gold-glow); margin-bottom: 15px;">
+
+      <p id="admin-qr-link" style="font-size: 1rem; color: #fff; background: rgba(255,255,255,0.08); padding: 10px; border-radius: 8px; word-break: break-all; margin-bottom: 20px;">
+        Caricamento link...
+      </p>
+
+      <button onclick="closeQrModalAdmin()" class="btn-primary" style="width: 100%; padding: 12px;">Chiudi</button>
+    </div>
+  </div>
+
   <script>
-    function openGoogleSheetsImportModal() {
-      const challengeId = document.getElementById('select-challenge').value;
-      if (!challengeId) return alert('Seleziona prima una sfida!');
-      document.getElementById('modal-sheets-import').style.display = 'flex';
+    let currentServerQr = '';
+    let currentServerUrl = '';
+
+    function openQrModalAdmin() {
+      const displayUrl = currentServerUrl || window.location.origin;
+      document.getElementById('admin-qr-link').innerText = displayUrl + '/team.html';
+      if (currentServerQr) {
+        document.getElementById('admin-qr-img').src = currentServerQr;
+      } else {
+        fetch('/api/info')
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById('admin-qr-img').src = data.qrCode;
+          });
+      }
+      document.getElementById('modal-qr-admin').style.display = 'flex';
     }
 
-    function closeGoogleSheetsModal() {
-      document.getElementById('modal-sheets-import').style.display = 'none';
+    function closeQrModalAdmin() {
+      document.getElementById('modal-qr-admin').style.display = 'none';
     }
 
-    document.getElementById('form-sheets-import').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const challengeId = document.getElementById('select-challenge').value;
-      const sheetUrl = document.getElementById('sheets-url-input').value.trim();
-
-      fetch('/api/admin/sheets/import-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ challenge_id: challengeId, sheet_url: sheetUrl })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert(`🎉 Importate con successo ${data.count} domande da Google Sheets!`);
-          closeGoogleSheetsModal();
-          loadQuestionsForChallenge(challengeId);
-        } else {
-          alert('Errore: ' + (data.error || 'Impossibile importare da Google Sheets'));
-        }
-      })
-      .catch(err => alert('Errore di connessione: ' + err.message));
-    });
-
-    function exportToGoogleSheetsCSV() {
-      window.location.href = '/api/admin/sheets/export-csv';
+    function socketShowLobby() {
+      socket.emit('admin_show_lobby', { pin: adminPin });
     }
   </script>
 

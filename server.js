@@ -507,6 +507,15 @@ io.on('connection', (socket) => {
     io.emit('leaderboard_update', { overall });
   });
 
+  // Torna alla Lobby con QR Code
+  socket.on('admin_show_lobby', ({ pin }) => {
+    if (pin !== ADMIN_PIN) return socket.emit('admin_error', 'PIN Errato');
+
+    stopTimer();
+    gameState.status = 'LOBBY';
+    io.emit('game_state_update', buildPublicGameState());
+  });
+
   // Disconnessione socket
   socket.on('disconnect', () => {
     delete gameState.connectedTeams[socket.id];
