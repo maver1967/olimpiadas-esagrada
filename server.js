@@ -391,12 +391,47 @@ app.get('/api/admin/weeks', async (req, res) => {
   }
 });
 
-// Nuova settimana
+// Nuova settimana / sessao
 app.post('/api/admin/weeks', async (req, res) => {
   const { number, name } = req.body;
   try {
     const id = await db.createWeek(number, name);
     res.json({ success: true, id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Eliminar sessao
+app.delete('/api/admin/weeks/:id', async (req, res) => {
+  try {
+    await db.deleteWeek(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reset total dos pontos do torneio
+app.post('/api/admin/scores/reset', async (req, res) => {
+  try {
+    await db.resetAllScores();
+    io.emit('leaderboard_update', { challenge: [], overall: [] });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Corrigir pontuação de uma equipa especificamente
+app.post('/api/admin/scores/update', async (req, res) => {
+  const { challenge_id, team_id, score } = req.body;
+  try {
+    await db.updateTeamScore(challenge_id, team_id, score);
+    const leaderboard = await db.getChallengeLeaderboard(challenge_id);
+    const overall = await db.getOverallTournamentLeaderboard();
+    io.emit('leaderboard_update', { challenge: leaderboard, overall });
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

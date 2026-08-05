@@ -174,6 +174,17 @@ module.exports = {
     return res.id;
   },
 
+  async deleteWeek(weekId) {
+    const challenges = await dbQuery.all('SELECT id FROM challenges WHERE week_id = ?', [weekId]);
+    for (let c of challenges) {
+      await dbQuery.run('DELETE FROM questions WHERE challenge_id = ?', [c.id]);
+      await dbQuery.run('DELETE FROM responses WHERE challenge_id = ?', [c.id]);
+      await dbQuery.run('DELETE FROM match_scores WHERE challenge_id = ?', [c.id]);
+    }
+    await dbQuery.run('DELETE FROM challenges WHERE week_id = ?', [weekId]);
+    return await dbQuery.run('DELETE FROM weeks WHERE id = ?', [weekId]);
+  },
+
   async createChallenge(weekId, title) {
     const res = await dbQuery.run('INSERT INTO challenges (week_id, title) VALUES (?, ?)', [weekId, title]);
     return res.id;
@@ -271,5 +282,15 @@ module.exports = {
   async resetAllScores() {
     await dbQuery.run('DELETE FROM responses');
     await dbQuery.run('DELETE FROM match_scores');
+  },
+
+  async updateTeamScore(challengeId, teamId, score) {
+    await dbQuery.run(`
+      INSERT INTO match_scores (challenge_id, team_id, score)
+      VALUES (?, ?, ?)
+      ON CONFLICT(challenge_id, team_id) DO UPDATE SET
+      score = ?,
+      updated_at = CURRENT_TIMESTAMP
+    `, [challengeId, teamId, score, score]);
   }
 };
