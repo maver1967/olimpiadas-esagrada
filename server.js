@@ -215,6 +215,35 @@ async function refreshActiveChallengeQuestions(challengeId) {
   }
 }
 
+// --- IMPORTAÇÃO DE TEXTO COLADO DIRECTAMENTE ---
+const textParser = require('./textQuestionParser');
+
+app.post('/api/admin/questions/import-text', async (req, res) => {
+  const { challenge_id, raw_text } = req.body;
+  try {
+    const questions = textParser.parsePastedText(raw_text);
+    if (questions.length === 0) {
+      return res.status(400).json({ error: "Nenhuma pergunta válida encontrada no texto colado. Verifica o formato." });
+    }
+
+    const existing = await db.getQuestionsForChallenge(challenge_id);
+    let order = existing.length + 1;
+
+    for (let q of questions) {
+      await db.saveQuestion({
+        ...q,
+        challenge_id,
+        question_order: order++
+      });
+    }
+
+    await refreshActiveChallengeQuestions(challenge_id);
+    res.json({ success: true, count: questions.length });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao importar texto colado: " + err.message });
+  }
+});
+
 // --- GERADOR AUTOMÁTICO DE PERGUNTAS POR DISCIPLINA & NÍVEL ---
 const questionGenerator = require('./questionBankGenerator');
 

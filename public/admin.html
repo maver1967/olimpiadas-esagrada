@@ -111,14 +111,17 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
             <h3 style="color: var(--text-main); font-size: 1.4rem;">📝 Perguntas Carregadas para o Desafio</h3>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button onclick="openPasteTextModal()" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                📋 Colar Texto de IA
+              </button>
               <button onclick="openAutoGenerateModal()" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                ✨ Gerador Automático de Perguntas
+                ✨ Gerador Automático
               </button>
               <button onclick="openGoogleSheetsImportModal()" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #047857);">
-                📊 Importar do Google Sheets
+                📊 Google Sheets
               </button>
               <button onclick="exportToGoogleSheetsCSV()" class="btn-primary" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
-                📥 Baixar CSV para Google Sheets
+                📥 Baixar CSV
               </button>
               <button onclick="openNewQuestionModal()" class="btn-success">+ Adicionar Pergunta</button>
             </div>
@@ -195,6 +198,37 @@
         <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
           <button type="button" onclick="closeQuestionModal()" style="padding: 10px 20px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid #aaa; cursor: pointer;">Cancelar</button>
           <button type="submit" class="btn-success">Salvar Pergunta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL IMPORTAÇÃO POR TEXTO COLADO -->
+  <div id="modal-paste-text" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 215; align-items: center; justify-content: center;">
+    <div class="glass-panel" style="max-width: 650px; width: 90%; padding: 30px;">
+      <h2 style="margin-bottom: 15px; color: var(--accent-gold);">📋 Colar Texto de Perguntas (IA / ChatGPT / Claude)</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
+        Cola aqui o texto com as perguntas geradas por qualquer Inteligência Artificial. Suporta tabelas CSV, formato com barras (<code>|</code>) ou blocos de perguntas:
+      </p>
+
+      <form id="form-paste-text">
+        <div class="form-group">
+          <textarea id="pasted-text-input" class="form-input" style="height: 200px; font-family: monospace; font-size: 0.85rem;" placeholder="Exemplo em formato bloco:
+
+1. Qual é o rio mais longo de Moçambique?
+A) Limpopo
+B) Zambeze
+C) Rovuma
+D) Save
+Resposta: B
+
+Ou formato tabela / CSV:
+Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Platão | Sócrates | B" required></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 15px;">
+          <button type="button" onclick="closePasteTextModal()" style="padding: 10px 20px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid #aaa; cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">📋 Importar Perguntas Coladas</button>
         </div>
       </form>
     </div>
@@ -316,6 +350,38 @@
     function socketShowLobby() {
       socket.emit('admin_show_lobby', { pin: adminPin });
     }
+
+    // Modal e Logica Colar Texto de IA
+    function openPasteTextModal() {
+      const challengeId = document.getElementById('select-challenge').value;
+      if (!challengeId) return;
+      document.getElementById('modal-paste-text').style.display = 'flex';
+    }
+
+    function closePasteTextModal() {
+      document.getElementById('modal-paste-text').style.display = 'none';
+      document.getElementById('pasted-text-input').value = '';
+    }
+
+    document.getElementById('form-paste-text').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const challengeId = document.getElementById('select-challenge').value;
+      const rawText = document.getElementById('pasted-text-input').value;
+
+      fetch('/api/admin/questions/import-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challenge_id: challengeId, raw_text: rawText })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          closePasteTextModal();
+          loadQuestionsForChallenge(challengeId);
+        }
+      })
+      .catch(err => console.error(err));
+    });
 
     // Modal e Logica Gerador Automático de Perguntas
     function openAutoGenerateModal() {
