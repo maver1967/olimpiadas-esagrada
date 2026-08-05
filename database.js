@@ -263,6 +263,12 @@ module.exports = {
     `);
   },
 
+  // Recupera tutti i testi delle domande già usate nel torneo (per evitare ripetizioni nelle settimane successive)
+  async getAllUsedQuestionTexts() {
+    const rows = await dbQuery.all('SELECT DISTINCT LOWER(text) as text FROM questions');
+    return rows.map(r => r.text.trim());
+  },
+
   // Reset Torneo / Dati
   async resetAllScores() {
     await dbQuery.run('DELETE FROM responses');

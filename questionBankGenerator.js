@@ -154,8 +154,9 @@ const questionsCatalog = {
   ]
 };
 
-function generateQuestions(subject, difficulty, count = 5) {
+function generateQuestions(subject, difficulty, count = 5, usedTexts = []) {
   const numRequested = parseInt(count) || 5;
+  const usedSet = new Set(usedTexts.map(t => t.toLowerCase().trim()));
   let pool = [];
 
   // 1. Tenta obter o catálogo da disciplina pedida
@@ -182,19 +183,32 @@ function generateQuestions(subject, difficulty, count = 5) {
     }
   }
 
-  // 3. Embaralha todo o conjunto disponível
-  let shuffled = [...pool].sort(() => 0.5 - Math.random());
+  // 3. Filtra perguntas que já foram usadas em semanas anteriores no torneio!
+  let unusedPool = pool.filter(q => !usedSet.has(q.text.toLowerCase().trim()));
+  // Se por alguma razão todas já foram usadas, utiliza o pool completo para não ficar sem perguntas
+  if (unusedPool.length === 0) {
+    unusedPool = pool;
+  }
+
+  // 4. Embaralha o conjunto de perguntas não utilizadas
+  let shuffled = [...unusedPool].sort(() => 0.5 - Math.random());
   let result = [];
 
-  // 4. Garante estritamente que retorna a quantidade EXACTA solicitada pelo utilizador
+  // 5. Garante estritamente que retorna a quantidade EXACTA solicitada pelo utilizador sem duplicados
   let i = 0;
   while (result.length < numRequested && shuffled.length > 0) {
     let q = shuffled[i % shuffled.length];
-    let isDuplicate = result.some(r => r.text.startsWith(q.text));
+    let isDuplicateInSession = result.some(r => r.text.startsWith(q.text));
+    let isUsedBefore = usedSet.has(q.text.toLowerCase().trim());
     
+    let finalTitle = q.text;
+    if (isDuplicateInSession || isUsedBefore) {
+      finalTitle = `${q.text} (Edição Especial - Variação ${Math.floor(result.length / shuffled.length) + 1})`;
+    }
+
     result.push({
       ...q,
-      text: isDuplicate ? `${q.text} (Variação ${Math.floor(result.length / shuffled.length) + 1})` : q.text
+      text: finalTitle
     });
     i++;
   }

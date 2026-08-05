@@ -223,9 +223,10 @@ app.post('/api/admin/questions/auto-generate', async (req, res) => {
   try {
     const numRequested = parseInt(count) || 5;
     const existing = await db.getQuestionsForChallenge(challenge_id);
+    const usedTexts = await db.getAllUsedQuestionTexts();
     let order = existing.length + 1;
 
-    const generated = questionGenerator.generateQuestions(subject, difficulty, numRequested);
+    const generated = questionGenerator.generateQuestions(subject, difficulty, numRequested, usedTexts);
     if (generated.length === 0) {
       return res.status(400).json({ error: "Nenhuma pergunta encontrada para esta disciplina/nível." });
     }
