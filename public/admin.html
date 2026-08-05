@@ -82,9 +82,27 @@
           <div class="glass-panel" style="padding: 20px; border: 2px solid var(--accent-gold);">
             <h3 style="color: var(--accent-gold); margin-bottom: 15px; font-size: 1.3rem;">🚀 Controlo do Jogo em Directo</h3>
             
-            <div style="background: rgba(15,23,42,0.8); padding: 12px; border-radius: 10px; margin-bottom: 15px;">
-              <p>Estado Actual: <strong id="admin-status-display" style="color: var(--accent-gold);">LOBBY</strong></p>
-              <p>Pergunta Actual: <strong id="admin-q-progress">0/0</strong></p>
+            <!-- MONITOR DE TEMPO E PONTUAÇÃO DAS EQUIPAS EM DIRECTO -->
+            <div style="background: rgba(15,23,42,0.9); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(245, 158, 11, 0.4);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                  <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Estado & Progresso</p>
+                  <p style="font-weight: 700; font-size: 0.95rem;"><span id="admin-status-display" style="color: var(--accent-gold);">LOBBY</span> (<span id="admin-q-progress">0/0</span>)</p>
+                </div>
+                <div id="admin-live-timer" style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 900; color: var(--accent-gold); background: rgba(0,0,0,0.5); padding: 6px 14px; border-radius: 10px; border: 2px solid var(--accent-gold);">
+                  ⏰ 15s
+                </div>
+              </div>
+
+              <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 10px;">
+                <p style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 8px; display: flex; justify-content: space-between;">
+                  <span>🏆 Equipas & Pontuação:</span>
+                  <span id="admin-voted-count" style="color: var(--accent-gold);">Votos: 0/0</span>
+                </p>
+                <div id="admin-teams-monitor" style="display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; padding-right: 4px;">
+                  <p style="font-size: 0.85rem; color: var(--text-muted);">Nenhuma equipa ligada ainda...</p>
+                </div>
+              </div>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -575,9 +593,33 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
     }
 
     let lastGameState = null;
+    let latestLeaderboard = [];
 
     socket.on('admin_error', (msg) => console.error('ADMIN ERROR:', msg));
     socket.on('admin_info', (msg) => console.log('ADMIN INFO:', msg));
+
+    socket.on('timer_tick', (data) => {
+      const timerEl = document.getElementById('admin-live-timer');
+      if (timerEl) {
+        timerEl.innerText = `⏰ ${data.seconds}s`;
+        if (data.isWarning) {
+          timerEl.style.color = '#ef4444';
+          timerEl.style.borderColor = '#ef4444';
+        } else {
+          timerEl.style.color = 'var(--accent-gold)';
+          timerEl.style.borderColor = 'var(--accent-gold)';
+        }
+      }
+    });
+
+    socket.on('leaderboard_update', (data) => {
+      if (data.challenge) {
+        latestLeaderboard = data.challenge;
+      } else if (data.overall) {
+        latestLeaderboard = data.overall;
+      }
+      updateAdminTeamsMonitor();
+    });
 
     socket.on('game_state_update', (state) => {
       lastGameState = state;
@@ -585,10 +627,51 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
       document.getElementById('admin-q-progress').innerText = 
         `${state.currentQuestionIndex + 1} de ${state.totalQuestions}`;
       
+      updateAdminTeamsMonitor();
+
       if (currentQuestions.length > 0) {
         renderQuestionsList(currentQuestions);
       }
     });
+
+    function updateAdminTeamsMonitor() {
+      const container = document.getElementById('admin-teams-monitor');
+      if (!container || !lastGameState) return;
+
+      const connectedTeams = lastGameState.connectedTeams || {};
+      const teamKeys = Object.keys(connectedTeams);
+      const responses = lastGameState.responses || {};
+
+      const votedEl = document.getElementById('admin-voted-count');
+      if (votedEl) {
+        votedEl.innerText = `Votos: ${Object.keys(responses).length}/${teamKeys.length}`;
+      }
+
+      if (teamKeys.length === 0) {
+        container.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted);">Nenhuma equipa ligada ainda...</p>';
+        return;
+      }
+
+      const scoreMap = {};
+      latestLeaderboard.forEach(item => {
+        scoreMap[item.id] = item.score !== undefined ? item.score : item.total_score;
+      });
+
+      container.innerHTML = Object.values(connectedTeams).map(team => {
+        const hasVoted = !!responses[team.id];
+        const score = scoreMap[team.id] !== undefined ? scoreMap[team.id] : 0;
+
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 6px 10px; border-radius: 8px; border-left: 4px solid ${team.color || '#3b82f6'}; font-size: 0.85rem;">
+            <span style="font-weight: 700; color: #fff;">${team.name}</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span>${hasVoted ? '<strong style="color: #10b981;">🗳️ Votou</strong>' : '<span style="color: var(--accent-gold);">⏳ A pensar...</span>'}</span>
+              <span style="background: rgba(245, 158, 11, 0.2); color: var(--accent-gold); font-weight: 800; padding: 2px 8px; border-radius: 12px;">${score} pt</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     function renderQuestionsList(questions) {
       const container = document.getElementById('questions-list-container');
