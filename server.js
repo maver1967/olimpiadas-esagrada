@@ -209,6 +209,8 @@ function buildPublicGameState() {
     teamsCount: Object.keys(gameState.connectedTeams).length,
     votedCount: Object.keys(gameState.responses).length
   };
+}
+
 // Helper per aggiornare in tempo reale le domande della sfida attiva
 async function refreshActiveChallengeQuestions(challengeId) {
   if (gameState.activeChallengeId == challengeId) {
