@@ -517,16 +517,23 @@ io.on('connection', (socket) => {
 
   // Ricezione voto dalla squadra
   socket.on('submit_vote', (voteData) => {
-    if (gameState.status !== 'QUESTION_ACTIVE') {
-      return socket.emit('vote_rejected', 'Votazione non attiva o tempo scaduto.');
+    if (gameState.status !== 'QUESTION_ACTIVE' && gameState.status !== 'VOTING_CLOSED') {
+      return socket.emit('vote_rejected', 'Votazione non attiva.');
     }
 
-    const team = gameState.connectedTeams[socket.id];
+    let team = gameState.connectedTeams[socket.id];
+
+    // Fallback se il socket si è riconnesso da poco
+    if (!team && voteData.teamId && voteData.teamName) {
+      team = { id: voteData.teamId, name: voteData.teamName, color: voteData.color || '#3b82f6' };
+      gameState.connectedTeams[socket.id] = team;
+    }
+
     if (!team) {
       return socket.emit('vote_rejected', 'Registrati prima di votare.');
     }
 
-    // Registra o sovrascrivi voto se ancora entro il tempo
+    // Registra o sovrascrivi voto
     gameState.responses[team.id] = {
       option: voteData.option,
       responseTimeMs: (gameState.timerMax - gameState.timerSeconds) * 1000
@@ -538,24 +545,21 @@ io.on('connection', (socket) => {
 
   // --- CONTROLLI ADMIN VIA WEBSOCKET ---
 
+  // Selezione della sfida da proiettare
   socket.on('admin_select_challenge', async ({ challengeId, pin }) => {
     if (pin !== ADMIN_PIN) return socket.emit('admin_error', 'PIN Errato');
 
-    stopTimer();
     const questions = await db.getQuestionsForChallenge(challengeId);
-    if (questions.length === 0) {
-      return socket.emit('admin_error', 'Questa sfida non contiene ancora domande.');
-    }
-
-    // Carica la sfida
+    
+    // Trova nome settimana e sfida
     const weeks = await db.getAllWeeksWithChallenges();
-    let challengeTitle = 'Sfida';
     let weekName = '';
+    let challengeTitle = '';
     for (let w of weeks) {
       let found = w.challenges.find(c => c.id == challengeId);
       if (found) {
-        challengeTitle = found.title;
         weekName = w.name;
+        challengeTitle = found.title;
         break;
       }
     }
@@ -566,6 +570,7 @@ io.on('connection', (socket) => {
     gameState.questions = questions;
     gameState.currentQuestionIndex = 0;
     gameState.activeQuestion = questions[0];
+    gameState.completedQuestionIds = [];
     gameState.status = 'LOBBY';
     gameState.responses = {};
 

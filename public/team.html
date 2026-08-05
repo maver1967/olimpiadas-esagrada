@@ -144,7 +144,17 @@
       badge.innerText = team.name;
     });
 
-    // Controlla se esisteva una registrazione previa
+    // Re-conexão automática e sincronização do registo da equipa
+    socket.on('connect', () => {
+      const saved = localStorage.getItem('esagrada_team');
+      if (saved) {
+        try {
+          const team = JSON.parse(saved);
+          socket.emit('team_join', { name: team.name, color: team.color });
+        } catch(e) {}
+      }
+    });
+
     const saved = localStorage.getItem('esagrada_team');
     if (saved) {
       try {
@@ -154,12 +164,17 @@
       } catch(e) {}
     }
 
-    // Gestione selezione opzione
+    // Gestione seleção opção
     function selectOption(letter) {
       if (isVoteLocked || !currentTeam) return;
 
       selectedOptionLetter = letter;
-      socket.emit('submit_vote', { option: letter });
+      socket.emit('submit_vote', { 
+        option: letter, 
+        teamId: currentTeam.id, 
+        teamName: currentTeam.name, 
+        color: currentTeam.color 
+      });
 
       document.querySelectorAll('.team-btn-option').forEach(btn => btn.classList.remove('selected'));
       const chosenBtn = document.querySelector(`.team-btn-option.${letter}`);
