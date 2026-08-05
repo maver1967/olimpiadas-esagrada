@@ -176,6 +176,8 @@
       // Conferma voto registrato
     });
 
+    let currentQuestionId = null;
+
     socket.on('game_state_update', (state) => {
       if (!currentTeam) return;
 
@@ -188,6 +190,7 @@
         screenPlay.style.display = 'none';
         screenResult.style.display = 'none';
         selectedOptionLetter = null;
+        currentQuestionId = null;
         isVoteLocked = false;
       }
       else if (state.status === 'QUESTION_ACTIVE' || state.status === 'VOTING_CLOSED' || state.status === 'REVEAL_ANSWER') {
@@ -199,6 +202,17 @@
           isVoteLocked = false;
 
           document.querySelectorAll('.team-btn-option').forEach(b => b.disabled = false);
+
+          // Reseta a selecção e o aviso quando entra uma pergunta nova
+          if (state.activeQuestion && state.activeQuestion.id !== currentQuestionId) {
+            currentQuestionId = state.activeQuestion.id;
+            selectedOptionLetter = null;
+            document.querySelectorAll('.team-btn-option').forEach(b => b.classList.remove('selected'));
+            
+            const statusBanner = document.getElementById('vote-status-banner');
+            statusBanner.style.display = 'none';
+            statusBanner.innerText = '';
+          }
 
           if (state.activeQuestion) {
             document.getElementById('team-q-category').innerText = state.activeQuestion.category || 'Geral';
