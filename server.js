@@ -57,6 +57,7 @@ let gameState = {
   questions: [],
   currentQuestionIndex: 0,
   activeQuestion: null,
+  completedQuestionIds: [], // IDs das perguntas já realizadas e avaliadas
   timerSeconds: 15,
   timerMax: 15,
   timerInterval: null,
@@ -102,6 +103,9 @@ function startQuestionTimer(duration = 15) {
       // 2. Dopo 2 secondi: Mostra Risposta Corretta + Chi ha indovinato e chi ha sbagliato (5 secondi)
       setTimeout(async () => {
         gameState.status = 'REVEAL_ANSWER';
+        if (gameState.activeQuestion && !gameState.completedQuestionIds.includes(gameState.activeQuestion.id)) {
+          gameState.completedQuestionIds.push(gameState.activeQuestion.id);
+        }
         io.emit('game_state_update', buildPublicGameState());
 
         // Calcola e salva i punteggi del round
@@ -201,6 +205,7 @@ function buildPublicGameState() {
     currentQuestionIndex: gameState.currentQuestionIndex,
     totalQuestions: gameState.questions.length,
     activeQuestion: safeQuestion,
+    completedQuestionIds: gameState.completedQuestionIds || [],
     teamOutcomes: teamOutcomes,
     timerSeconds: gameState.timerSeconds,
     timerMax: gameState.timerMax,
@@ -566,6 +571,21 @@ io.on('connection', (socket) => {
 
     io.emit('game_state_update', buildPublicGameState());
     socket.emit('admin_success', 'Sfida caricata con successo!');
+  });
+
+  // Selezione diretta di una domanda cliccando sulla lista
+  socket.on('admin_select_question_index', ({ index, pin }) => {
+    if (pin !== ADMIN_PIN) return socket.emit('admin_error', 'PIN Errato');
+
+    if (gameState.questions && index >= 0 && index < gameState.questions.length) {
+      stopTimer();
+      gameState.currentQuestionIndex = index;
+      gameState.activeQuestion = gameState.questions[index];
+      gameState.status = 'LOBBY';
+      gameState.responses = {};
+
+      io.emit('game_state_update', buildPublicGameState());
+    }
   });
 
   // Avvio o Prossima Domanda
