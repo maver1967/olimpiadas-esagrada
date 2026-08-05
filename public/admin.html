@@ -74,8 +74,7 @@
             </div>
 
             <div style="display: flex; gap: 10px;">
-              <button onclick="createWeekPrompt()" class="btn-primary" style="flex: 1; font-size: 0.85rem;">+ Nova Sessão</button>
-              <button onclick="createChallengePrompt()" class="btn-primary" style="flex: 1; font-size: 0.85rem;">+ Novo Desafio</button>
+              <button onclick="openNewSessionModal()" class="btn-primary" style="flex: 1; font-size: 1rem; padding: 12px; background: linear-gradient(135deg, #10b981, #047857);">+ Criar Nova Sessão de Jogo</button>
             </div>
           </div>
 
@@ -210,6 +209,28 @@
         <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
           <button type="button" onclick="closeQuestionModal()" style="padding: 10px 20px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid #aaa; cursor: pointer;">Cancelar</button>
           <button type="submit" class="btn-success">Salvar Pergunta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CRIAR NOVA SESSÃO -->
+  <div id="modal-new-session" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 220; align-items: center; justify-content: center;">
+    <div class="glass-panel" style="max-width: 500px; width: 90%; padding: 30px;">
+      <h2 style="margin-bottom: 15px; color: var(--accent-gold);">✨ Criar Nova Sessão de Jogo</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">
+        Escreve o nome para a nova sessão (ex: <em>Sessão Filosofia 10ªA</em>). A lista de perguntas será limpa para preparares as novas perguntas:
+      </p>
+
+      <form id="form-new-session">
+        <div class="form-group">
+          <label for="session-name-input">Nome da Sessão:</label>
+          <input type="text" id="session-name-input" class="form-input" placeholder="Ex. Sessão Filosofia 10ªA" required style="font-size: 1.1rem; padding: 12px;">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
+          <button type="button" onclick="closeNewSessionModal()" style="padding: 10px 20px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid #aaa; cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #047857);">✨ Criar e Abrir Sessão</button>
         </div>
       </form>
     </div>
@@ -472,7 +493,45 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
       loadWeeksAndChallenges();
     }
 
-    function loadWeeksAndChallenges() {
+    function openNewSessionModal() {
+      document.getElementById('modal-new-session').style.display = 'flex';
+      document.getElementById('session-name-input').value = '';
+      setTimeout(() => document.getElementById('session-name-input').focus(), 100);
+    }
+
+    function closeNewSessionModal() {
+      document.getElementById('modal-new-session').style.display = 'none';
+    }
+
+    document.getElementById('form-new-session').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('session-name-input').value.trim();
+      if (!name) return;
+
+      fetch('/api/admin/weeks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number: Date.now(), name })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const weekId = data.id;
+          fetch('/api/admin/challenges', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ week_id: weekId, title: 'Perguntas da Sessão' })
+          })
+          .then(res => res.json())
+          .then(chData => {
+            closeNewSessionModal();
+            loadWeeksAndChallenges(chData.id);
+          });
+        }
+      });
+    });
+
+    function loadWeeksAndChallenges(targetChallengeId = null) {
       fetch('/api/admin/weeks')
         .then(res => res.json())
         .then(weeks => {
@@ -486,6 +545,11 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
               select.appendChild(opt);
             });
           });
+
+          if (targetChallengeId) {
+            select.value = targetChallengeId;
+          }
+
           if (select.options.length > 0) {
             onChallengeSelected();
           }
@@ -540,18 +604,22 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
         const isSelected = (idx === activeIndex);
         const isCompleted = completedIds.includes(q.id);
 
-        let borderStyle = '1px solid rgba(255,255,255,0.1)';
-        let backgroundStyle = 'rgba(15,23,42,0.6)';
+        let borderStyle = '1px solid rgba(16, 185, 129, 0.4)';
+        let backgroundStyle = 'rgba(16, 185, 129, 0.12)';
         let opacityStyle = '1';
+        let badgeHtml = '<span style="background: #10b981; color: #fff; font-weight: 800; font-size: 0.75rem; padding: 3px 10px; border-radius: 10px;">⏳ POR REALIZAR</span>';
 
         if (isSelected) {
-          borderStyle = '2px solid var(--accent-gold)';
-          backgroundStyle = 'rgba(245, 158, 11, 0.15)';
+          borderStyle = '3px solid #f59e0b';
+          backgroundStyle = 'rgba(245, 158, 11, 0.2)';
+          badgeHtml = '<span style="background: #f59e0b; color: #000; font-weight: 900; font-size: 0.75rem; padding: 3px 10px; border-radius: 10px;">🎯 EM DIRETO / ACTIVA</span>';
         }
 
         if (isCompleted) {
-          opacityStyle = '0.45';
-          backgroundStyle = 'rgba(15,23,42,0.3)';
+          opacityStyle = '0.55';
+          borderStyle = '1px dashed rgba(239, 68, 68, 0.5)';
+          backgroundStyle = 'rgba(239, 68, 68, 0.12)';
+          badgeHtml = '<span style="background: #dc2626; color: #fff; font-weight: 800; font-size: 0.75rem; padding: 3px 10px; border-radius: 10px;">✓ JÁ REALIZADA</span>';
         }
 
         return `
@@ -563,8 +631,7 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
               <div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span class="category-badge" style="font-size: 0.75rem; padding: 3px 10px;">${q.category || 'Geral'}</span>
-                  ${isSelected ? '<span style="background: var(--accent-gold); color: #000; font-weight: 800; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;">🎯 ACTIVA PARA PROJECÇÃO</span>' : ''}
-                  ${isCompleted ? '<span style="background: rgba(239,68,68,0.3); color: #f87171; font-weight: 700; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;">✓ JÁ REALIZADA</span>' : ''}
+                  ${badgeHtml}
                 </div>
                 <p style="font-weight: 600; font-size: 1.1rem; margin-top: 4px;">${q.text}</p>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
