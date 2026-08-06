@@ -38,7 +38,7 @@ function parseCSV(text) {
         option_c: values[4] || '',
         option_d: values[5] || '',
         correct_option: (values[6] || 'A').toUpperCase(),
-        points: parseInt(values[7]) || 100,
+        points: parseInt(values[7]) || 1,
         time_limit: parseInt(values[8]) || 15
       });
     }

@@ -56,7 +56,7 @@ db.serialize(() => {
       option_c TEXT NOT NULL,
       option_d TEXT NOT NULL,
       correct_option TEXT NOT NULL, -- 'A', 'B', 'C', 'D'
-      points INTEGER DEFAULT 100,
+      points INTEGER DEFAULT 1,
       time_limit INTEGER DEFAULT 15,
       FOREIGN KEY (challenge_id) REFERENCES challenges (id) ON DELETE CASCADE
     )
@@ -202,14 +202,14 @@ module.exports = {
         UPDATE questions 
         SET category = ?, text = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, correct_option = ?, points = ?, time_limit = ?, question_order = ?
         WHERE id = ?
-      `, [category, text, option_a, option_b, option_c, option_d, correct_option, points || 100, time_limit || 15, question_order, id]);
+      `, [category, text, option_a, option_b, option_c, option_d, correct_option, points || 1, time_limit || 15, question_order, id]);
       return id;
     } else {
       const res = await dbQuery.run(`
         INSERT INTO questions 
         (challenge_id, question_order, category, text, option_a, option_b, option_c, option_d, correct_option, points, time_limit)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [challenge_id, question_order, category || 'Generale', text, option_a, option_b, option_c, option_d, correct_option, points || 100, time_limit || 15]);
+      `, [challenge_id, question_order, category || 'Geral', text, option_a, option_b, option_c, option_d, correct_option, points || 1, time_limit || 15]);
       return res.id;
     }
   },
