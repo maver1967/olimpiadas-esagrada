@@ -802,8 +802,12 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
       fetch('/api/admin/scores/reset', { method: 'POST' })
         .then(res => res.json())
         .then(data => {
-          if (data.success && lastGameState) {
-            socket.emit('admin_select_challenge', { challengeId: lastGameState.activeChallengeId, pin: adminPin });
+          if (data.success) {
+            latestLeaderboard = [];
+            updateAdminTeamsMonitor();
+            if (lastGameState && lastGameState.activeChallengeId) {
+              socket.emit('admin_select_challenge', { challengeId: lastGameState.activeChallengeId, pin: adminPin });
+            }
           }
         });
     }
