@@ -655,20 +655,11 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
       
       const btnStart = document.getElementById('btn-start-question');
       if (btnStart) {
-        const currentQ = state.activeQuestion;
-        const isCompleted = currentQ && state.completedQuestionIds && state.completedQuestionIds.includes(currentQ.id);
-
-        if (isCompleted) {
-          btnStart.style.background = 'rgba(239, 68, 68, 0.3)';
-          btnStart.style.border = '1px solid #ef4444';
-          btnStart.style.color = '#f87171';
-          btnStart.innerText = '🔒 PERGUNTA JÁ REALIZADA (Seleciona outra)';
-        } else {
-          btnStart.style.background = 'var(--success-green)';
-          btnStart.style.border = 'none';
-          btnStart.style.color = '#fff';
-          btnStart.innerText = '▶️ INICIAR PERGUNTA (Timer 15s)';
-        }
+        btnStart.style.background = 'var(--success-green)';
+        btnStart.style.border = 'none';
+        btnStart.style.color = '#fff';
+        btnStart.style.cursor = 'pointer';
+        btnStart.innerText = '▶️ INICIAR PERGUNTA (Timer 15s)';
       }
 
       updateAdminTeamsMonitor();

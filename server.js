@@ -628,17 +628,22 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Avvio Domanda (Bloqueia perguntas já realizadas)
+  // Avvio Domanda (Garante lanciare sempre la domanda selezionata)
   socket.on('admin_start_question', ({ pin }) => {
     if (pin !== ADMIN_PIN) return socket.emit('admin_error', 'PIN Errato');
 
     if (!gameState.questions || gameState.questions.length === 0) {
-      return socket.emit('admin_error', 'Nenhuma pergunta carregada neste desafio.');
+      return socket.emit('admin_error', 'Nenhuma pergunta carregada neste desafio. Adiciona perguntas primeiro.');
     }
 
-    const currentQ = gameState.activeQuestion;
-    if (currentQ && gameState.completedQuestionIds.includes(currentQ.id)) {
-      return socket.emit('admin_error', '⚠️ Esta pergunta já foi realizada! Seleciona uma pergunta pendente (⏳ POR REALIZAR).');
+    if (!gameState.activeQuestion && gameState.questions.length > 0) {
+      gameState.activeQuestion = gameState.questions[0];
+      gameState.currentQuestionIndex = 0;
+    }
+
+    // Se a pergunta estava nos concluídos, limpa para permitir o arranque imediato
+    if (gameState.activeQuestion && gameState.completedQuestionIds.includes(gameState.activeQuestion.id)) {
+      gameState.completedQuestionIds = gameState.completedQuestionIds.filter(id => id !== gameState.activeQuestion.id);
     }
 
     gameState.status = 'QUESTION_ACTIVE';
