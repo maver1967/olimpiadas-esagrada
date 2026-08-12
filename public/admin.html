@@ -157,6 +157,9 @@
               <button onclick="exportToGoogleSheetsCSV()" class="btn-primary" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
                 📥 Baixar CSV
               </button>
+              <button onclick="downloadSessionsBackup()" class="btn-primary" style="background: linear-gradient(135deg, #6366f1, #4338ca);">
+                💾 Backup Sessões
+              </button>
               <button onclick="openNewQuestionModal()" class="btn-success">+ Adicionar Pergunta</button>
             </div>
           </div>
@@ -500,6 +503,10 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
 
     let adminPin = localStorage.getItem('esagrada_admin_pin') || '';
     let currentQuestions = [];
+
+    function downloadSessionsBackup() {
+      window.location.href = '/api/admin/backup/export';
+    }
 
     // Form Login PIN
     document.getElementById('form-login').addEventListener('submit', (e) => {

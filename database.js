@@ -104,25 +104,82 @@ db.serialize(() => {
     )
   `);
 
-  // Inserisce una sessão iniziale predefinita se il database è nuovo
-  db.get('SELECT COUNT(*) as count FROM weeks', (err, row) => {
+  // Inserisce una sessão iniziale predefinita se il database è nuovo o ripristina dal backup JSON
+  db.get('SELECT COUNT(*) as count FROM weeks', async (err, row) => {
     if (!err && row.count === 0) {
-      db.run('INSERT INTO weeks (number, name) VALUES (?, ?)', [1, 'Sessão 1']);
-      db.run('INSERT INTO challenges (week_id, title) VALUES (?, ?)', [1, 'Desafio 1']);
-      
-      // Inserisce domande demonstrativas di prova
-      const demoQuestions = [
-        [1, 1, 'Geografia', 'Qual é a capital de Moçambique?', 'Beira', 'Maputo', 'Nampula', 'Pemba', 'B', 1, 15],
-        [1, 2, 'História', 'Em que ano Moçambique proclamou a sua Independência?', '1964', '1975', '1992', '1980', 'B', 1, 15],
-        [1, 3, 'Ciências', 'Qual é a fórmula química da água?', 'H2O', 'CO2', 'NaCl', 'O2', 'A', 1, 15]
-      ];
-      demoQuestions.forEach(q => {
-        db.run('INSERT INTO questions (challenge_id, question_order, category, text, option_a, option_b, option_c, option_d, correct_option, points, time_limit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', q);
-      });
-      console.log('Dados iniciais de demonstração criados com sucesso.');
+      const restored = await autoRestoreBackupJSON();
+      if (!restored) {
+        db.run('INSERT INTO weeks (number, name) VALUES (?, ?)', [1, 'Sessão 1']);
+        db.run('INSERT INTO challenges (week_id, title) VALUES (?, ?)', [1, 'Desafio 1']);
+        
+        // Inserisce domande demonstrativas di prova
+        const demoQuestions = [
+          [1, 1, 'Geografia', 'Qual é a capital de Moçambique?', 'Beira', 'Maputo', 'Nampula', 'Pemba', 'B', 1, 15],
+          [1, 2, 'História', 'Em que ano Moçambique proclamou a sua Independência?', '1964', '1975', '1992', '1980', 'B', 1, 15],
+          [1, 3, 'Ciências', 'Qual é a fórmula química da água?', 'H2O', 'CO2', 'NaCl', 'O2', 'A', 1, 15]
+        ];
+        demoQuestions.forEach(q => {
+          db.run('INSERT INTO questions (challenge_id, question_order, category, text, option_a, option_b, option_c, option_d, correct_option, points, time_limit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', q);
+        });
+        console.log('Dados iniciais de demonstração criados com sucesso.');
+      }
     }
   });
 });
+
+const backupFilePath = path.join(dataDir, 'sessions_backup.json');
+
+async function autoSaveBackupJSON() {
+  try {
+    const weeks = await dbQuery.all('SELECT * FROM weeks ORDER BY number ASC');
+    for (let w of weeks) {
+      w.challenges = await dbQuery.all('SELECT * FROM challenges WHERE week_id = ? ORDER BY id ASC', [w.id]);
+      for (let c of w.challenges) {
+        c.questions = await dbQuery.all('SELECT * FROM questions WHERE challenge_id = ? ORDER BY question_order ASC', [c.id]);
+      }
+    }
+    fs.writeFileSync(backupFilePath, JSON.stringify(weeks, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Erro ao auto-guardar backup JSON:', err.message);
+  }
+}
+
+async function autoRestoreBackupJSON() {
+  if (!fs.existsSync(backupFilePath)) return false;
+  try {
+    const raw = fs.readFileSync(backupFilePath, 'utf8');
+    const weeks = JSON.parse(raw);
+    if (!Array.isArray(weeks) || weeks.length === 0) return false;
+
+    console.log('🔄 A restaurar sessões do ficheiro de segurança...');
+    for (let w of weeks) {
+      const resW = await dbQuery.run('INSERT INTO weeks (number, name) VALUES (?, ?)', [w.number, w.name]);
+      const weekId = resW.id;
+
+      if (Array.isArray(w.challenges)) {
+        for (let c of w.challenges) {
+          const resC = await dbQuery.run('INSERT INTO challenges (week_id, title, status) VALUES (?, ?, ?)', [weekId, c.title, c.status || 'draft']);
+          const challengeId = resC.id;
+
+          if (Array.isArray(c.questions)) {
+            for (let q of c.questions) {
+              await dbQuery.run(`
+                INSERT INTO questions 
+                (challenge_id, question_order, category, text, option_a, option_b, option_c, option_d, correct_option, points, time_limit)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              `, [challengeId, q.question_order, q.category, q.text, q.option_a, q.option_b, q.option_c, q.option_d, q.correct_option, q.points || 1, q.time_limit || 15]);
+            }
+          }
+        }
+      }
+    }
+    console.log('✅ Sessões restauradas com sucesso a partir do backup!');
+    return true;
+  } catch (err) {
+    console.error('Erro ao restaurar backup JSON:', err.message);
+    return false;
+  }
+}
 
 // Helper con Promise per query pulite
 const dbQuery = {
@@ -171,6 +228,7 @@ module.exports = {
 
   async createWeek(number, name) {
     const res = await dbQuery.run('INSERT INTO weeks (number, name) VALUES (?, ?)', [number, name]);
+    autoSaveBackupJSON();
     return res.id;
   },
 
@@ -182,11 +240,14 @@ module.exports = {
       await dbQuery.run('DELETE FROM match_scores WHERE challenge_id = ?', [c.id]);
     }
     await dbQuery.run('DELETE FROM challenges WHERE week_id = ?', [weekId]);
-    return await dbQuery.run('DELETE FROM weeks WHERE id = ?', [weekId]);
+    const res = await dbQuery.run('DELETE FROM weeks WHERE id = ?', [weekId]);
+    autoSaveBackupJSON();
+    return res;
   },
 
   async createChallenge(weekId, title) {
     const res = await dbQuery.run('INSERT INTO challenges (week_id, title) VALUES (?, ?)', [weekId, title]);
+    autoSaveBackupJSON();
     return res.id;
   },
 
@@ -197,31 +258,36 @@ module.exports = {
 
   async saveQuestion(questionData) {
     const { id, challenge_id, question_order, category, text, option_a, option_b, option_c, option_d, correct_option, points, time_limit } = questionData;
+    let resultId = id;
     if (id) {
       await dbQuery.run(`
         UPDATE questions 
         SET category = ?, text = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, correct_option = ?, points = ?, time_limit = ?, question_order = ?
         WHERE id = ?
       `, [category, text, option_a, option_b, option_c, option_d, correct_option, points || 1, time_limit || 15, question_order, id]);
-      return id;
     } else {
       const res = await dbQuery.run(`
         INSERT INTO questions 
         (challenge_id, question_order, category, text, option_a, option_b, option_c, option_d, correct_option, points, time_limit)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [challenge_id, question_order, category || 'Geral', text, option_a, option_b, option_c, option_d, correct_option, points || 1, time_limit || 15]);
-      return res.id;
+      resultId = res.id;
     }
+    autoSaveBackupJSON();
+    return resultId;
   },
 
   async deleteQuestion(id) {
-    return await dbQuery.run('DELETE FROM questions WHERE id = ?', [id]);
+    const res = await dbQuery.run('DELETE FROM questions WHERE id = ?', [id]);
+    autoSaveBackupJSON();
+    return res;
   },
 
   async reorderQuestions(challengeId, questionIdsInOrder) {
     for (let index = 0; index < questionIdsInOrder.length; index++) {
       await dbQuery.run('UPDATE questions SET question_order = ? WHERE id = ? AND challenge_id = ?', [index + 1, questionIdsInOrder[index], challengeId]);
     }
+    autoSaveBackupJSON();
   },
 
   // Risposte e Punteggi (1 punto per ciascuna risposta corretta, 0 per errata)
@@ -292,5 +358,8 @@ module.exports = {
       score = ?,
       updated_at = CURRENT_TIMESTAMP
     `, [challengeId, teamId, score, score]);
-  }
+  },
+
+  autoSaveBackupJSON,
+  autoRestoreBackupJSON
 };

@@ -436,6 +436,43 @@ app.post('/api/admin/scores/update', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Exportar backup completo das sessoes em JSON
+app.get('/api/admin/backup/export', async (req, res) => {
+  try {
+    await db.autoSaveBackupJSON();
+    const weeks = await db.getAllWeeksWithChallenges();
+    for (let w of weeks) {
+      for (let c of w.challenges) {
+        c.questions = await db.getQuestionsForChallenge(c.id);
+      }
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="esagrada_sessoes_backup.json"');
+    res.send(JSON.stringify(weeks, null, 2));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Importar/Restaurar backup completo de sessoes
+app.post('/api/admin/backup/import', async (req, res) => {
+  try {
+    const backupData = req.body;
+    if (!Array.isArray(backupData)) {
+      return res.status(400).json({ success: false, message: 'Formato de backup inválido.' });
+    }
+    const fs = require('fs');
+    const path = require('path');
+    const dataDir = process.env.DATA_DIR || (fs.existsSync('/var/data') ? '/var/data' : path.join(__dirname, 'data'));
+    const backupFilePath = path.join(dataDir, 'sessions_backup.json');
+    fs.writeFileSync(backupFilePath, JSON.stringify(backupData, null, 2), 'utf8');
+
+    await db.autoRestoreBackupJSON();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Nuova sfida
 app.post('/api/admin/challenges', async (req, res) => {
