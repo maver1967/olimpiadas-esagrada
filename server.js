@@ -111,10 +111,23 @@ function startQuestionTimer(duration = 15) {
         // Calcola e salva i punteggi del round
         await processRoundResults();
 
-        // 3. Dopo 5 secondi: Mostra automaticamente la Classifica con i punteggi aggiornati
+        // 3. Após 5 segundos: Mostra a Classificação e avança automaticamente para a próxima pergunta no Admin
         setTimeout(async () => {
           if (gameState.status === 'REVEAL_ANSWER') {
             gameState.status = 'ROUND_RESULTS';
+            
+            // Avança automaticamente a pergunta activa no Admin para a próxima pergunta por realizar
+            if (gameState.questions && gameState.questions.length > 0) {
+              let nextIndex = gameState.currentQuestionIndex + 1;
+              while (nextIndex < gameState.questions.length && gameState.completedQuestionIds.includes(gameState.questions[nextIndex].id)) {
+                nextIndex++;
+              }
+              if (nextIndex < gameState.questions.length) {
+                gameState.currentQuestionIndex = nextIndex;
+                gameState.activeQuestion = gameState.questions[nextIndex];
+              }
+            }
+
             const leaderboard = await db.getChallengeLeaderboard(gameState.activeChallengeId);
             const overall = await db.getOverallTournamentLeaderboard();
             io.emit('game_state_update', buildPublicGameState());
