@@ -703,28 +703,37 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Avvio Domanda (Garante lanciare sempre a pergunta seleccionada e marcá-la como concluída)
-  socket.on('admin_start_question', ({ pin }) => {
+  // Avvio Domanda (Garante lanciare sempre a pergunta seleccionada de forma inquebrável)
+  socket.on('admin_start_question', async ({ pin }) => {
     if (pin !== ADMIN_PIN) return socket.emit('admin_error', 'PIN Errato');
+
+    if ((!gameState.questions || gameState.questions.length === 0) && gameState.activeChallengeId) {
+      gameState.questions = await db.getQuestionsForChallenge(gameState.activeChallengeId);
+    }
 
     if (!gameState.questions || gameState.questions.length === 0) {
       return socket.emit('admin_error', 'Nenhuma pergunta carregada neste desafio. Adiciona perguntas primeiro.');
     }
 
-    if (!gameState.activeQuestion && gameState.questions.length > 0) {
-      gameState.activeQuestion = gameState.questions[0];
+    if (gameState.currentQuestionIndex < 0 || gameState.currentQuestionIndex >= gameState.questions.length) {
       gameState.currentQuestionIndex = 0;
     }
 
-    // Marca IMEDIATAMENTE a pergunta como realizada assim que é iniciada
-    if (gameState.activeQuestion && !gameState.completedQuestionIds.includes(gameState.activeQuestion.id)) {
+    gameState.activeQuestion = gameState.questions[gameState.currentQuestionIndex];
+
+    if (!gameState.activeQuestion) {
+      return socket.emit('admin_error', 'Erro ao carregar a pergunta seleccionada.');
+    }
+
+    // Marca a pergunta activa como concluída no histórico
+    if (!gameState.completedQuestionIds.includes(gameState.activeQuestion.id)) {
       gameState.completedQuestionIds.push(gameState.activeQuestion.id);
     }
 
     gameState.status = 'QUESTION_ACTIVE';
     gameState.responses = {}; // Reset risposte del round
 
-    const timeLimit = gameState.activeQuestion ? (gameState.activeQuestion.time_limit || 15) : 15;
+    const timeLimit = gameState.activeQuestion.time_limit || 15;
     startQuestionTimer(timeLimit);
 
     io.emit('game_state_update', buildPublicGameState());
