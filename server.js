@@ -678,7 +678,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Avvio Domanda (Garante lanciare sempre la domanda selezionata)
+  // Avvio Domanda (Garante lanciare sempre a pergunta seleccionada e marcá-la como concluída)
   socket.on('admin_start_question', ({ pin }) => {
     if (pin !== ADMIN_PIN) return socket.emit('admin_error', 'PIN Errato');
 
@@ -691,9 +691,9 @@ io.on('connection', (socket) => {
       gameState.currentQuestionIndex = 0;
     }
 
-    // Se a pergunta estava nos concluídos, limpa para permitir o arranque imediato
-    if (gameState.activeQuestion && gameState.completedQuestionIds.includes(gameState.activeQuestion.id)) {
-      gameState.completedQuestionIds = gameState.completedQuestionIds.filter(id => id !== gameState.activeQuestion.id);
+    // Marca IMEDIATAMENTE a pergunta como realizada assim que é iniciada
+    if (gameState.activeQuestion && !gameState.completedQuestionIds.includes(gameState.activeQuestion.id)) {
+      gameState.completedQuestionIds.push(gameState.activeQuestion.id);
     }
 
     gameState.status = 'QUESTION_ACTIVE';
@@ -705,25 +705,17 @@ io.on('connection', (socket) => {
     io.emit('game_state_update', buildPublicGameState());
   });
 
-  // Passa alla prossima domanda (salta domande già svolte)
+  // Passa alla próxima pergunta
   socket.on('admin_next_question', ({ pin }) => {
     if (pin !== ADMIN_PIN) return socket.emit('admin_error', 'PIN Errato');
 
     let nextIndex = gameState.currentQuestionIndex + 1;
-    while (nextIndex < gameState.questions.length && gameState.completedQuestionIds.includes(gameState.questions[nextIndex].id)) {
-      nextIndex++;
-    }
-
     if (nextIndex < gameState.questions.length) {
-      stopTimer();
       gameState.currentQuestionIndex = nextIndex;
       gameState.activeQuestion = gameState.questions[nextIndex];
       gameState.status = 'LOBBY';
       gameState.responses = {};
-
       io.emit('game_state_update', buildPublicGameState());
-    } else {
-      socket.emit('admin_info', 'Chegaste ao fim das perguntas desta sessão!');
     }
   });
 
