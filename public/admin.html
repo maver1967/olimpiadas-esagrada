@@ -776,9 +776,12 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
           </thead>
           <tbody>
             ${allTeams.map(team => {
-              const resp = responses[team.id];
+              const resp = responses[team.id] || responses[String(team.id)];
               const score = team.score !== undefined ? team.score : 0;
               let statusBadge = '<span style="color: var(--text-muted);">🟢 Online</span>';
+
+              const activeQ = lastGameState.activeQuestion;
+              const correctOpt = (activeQ && activeQ.correct_option) ? activeQ.correct_option.toString().trim().toUpperCase() : '';
 
               if (lastGameState.status === 'QUESTION_ACTIVE') {
                 if (resp) {
@@ -794,10 +797,13 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
                 }
               } else if (lastGameState.status === 'REVEAL_ANSWER' || lastGameState.status === 'ROUND_RESULTS') {
                 if (resp) {
-                  if (resp.isCorrect) {
+                  const selectedOpt = resp.option ? resp.option.toString().trim().toUpperCase() : '';
+                  const isCorrect = (resp.isCorrect === true) || (selectedOpt && correctOpt && selectedOpt === correctOpt);
+
+                  if (isCorrect) {
                     statusBadge = '<span style="color: var(--success-green); font-weight: 800;">✅ Certa</span>';
                   } else {
-                    statusBadge = `<span style="color: var(--danger-red); font-weight: 700;">❌ Errada (${resp.option || ''})</span>`;
+                    statusBadge = `<span style="color: var(--danger-red); font-weight: 700;">❌ Errada (${selectedOpt || 'N/A'})</span>`;
                   }
                 } else {
                   statusBadge = '<span style="color: var(--danger-red); font-weight: 600;">❌ Sem resposta</span>';

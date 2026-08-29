@@ -153,6 +153,9 @@ async function processRoundResults() {
     const isCorrect = (selectedOpt === correctOpt);
     const pointsAwarded = isCorrect ? 1 : 0;
     
+    resp.isCorrect = isCorrect;
+    resp.option = selectedOpt;
+    
     await db.recordResponse(
       gameState.activeChallengeId,
       currentQ.id,
