@@ -222,7 +222,12 @@ function buildPublicGameState() {
     totalQuestions: gameState.questions.length,
     activeQuestion: safeQuestion,
     completedQuestionIds: gameState.completedQuestionIds || [],
-    teamOutcomes: teamOutcomes,
+    responses: gameState.responses || {},
+    connectedTeams: gameState.connectedTeams || {},
+    roundOutcomes: {
+      correct: teamOutcomes.filter(t => t.isCorrect),
+      incorrect: teamOutcomes.filter(t => !t.isCorrect)
+    },
     timerSeconds: gameState.timerSeconds,
     timerMax: gameState.timerMax,
     serverUrl: serverUrl,
@@ -621,11 +626,15 @@ io.on('connection', (socket) => {
       return socket.emit('vote_rejected', 'Registrati prima di votare.');
     }
 
-    // Registra o sovrascrivi voto
-    gameState.responses[team.id] = {
+    // Registra o voto com id numérico e em texto para garantia total de correspondência
+    const respObj = {
+      teamId: team.id,
+      teamName: team.name,
       option: voteData.option,
       responseTimeMs: (gameState.timerMax - gameState.timerSeconds) * 1000
     };
+    gameState.responses[team.id] = respObj;
+    gameState.responses[String(team.id)] = respObj;
 
     socket.emit('vote_accepted', { option: voteData.option });
     io.emit('game_state_update', buildPublicGameState());
