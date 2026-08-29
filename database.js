@@ -127,8 +127,8 @@ db.serialize(() => {
   });
 });
 
+const repositoryFilePath = path.join(__dirname, 'data', 'sessions_repository.json');
 const backupFilePath = path.join(dataDir, 'sessions_backup.json');
-const masterFilePath = path.join(__dirname, 'data', 'sessions_master.json');
 
 async function autoSaveBackupJSON() {
   try {
@@ -140,22 +140,27 @@ async function autoSaveBackupJSON() {
       }
     }
     const jsonStr = JSON.stringify(weeks, null, 2);
-    fs.writeFileSync(backupFilePath, jsonStr, 'utf8');
-    try { fs.writeFileSync(masterFilePath, jsonStr, 'utf8'); } catch(e) {}
+    fs.writeFileSync(repositoryFilePath, jsonStr, 'utf8');
+    try { fs.writeFileSync(backupFilePath, jsonStr, 'utf8'); } catch(e) {}
+    console.log('💾 Repositório permanente "sessions_repository.json" guardado com sucesso.');
   } catch (err) {
-    console.error('Erro ao auto-guardar backup JSON:', err.message);
+    console.error('Erro ao auto-guardar repositório JSON:', err.message);
   }
 }
 
 async function autoRestoreBackupJSON() {
-  const targetFile = fs.existsSync(backupFilePath) ? backupFilePath : (fs.existsSync(masterFilePath) ? masterFilePath : null);
+  const targetFile = fs.existsSync(repositoryFilePath) ? repositoryFilePath : (fs.existsSync(backupFilePath) ? backupFilePath : null);
   if (!targetFile) return false;
   try {
     const raw = fs.readFileSync(targetFile, 'utf8');
     const weeks = JSON.parse(raw);
     if (!Array.isArray(weeks) || weeks.length === 0) return false;
 
-    console.log('🔄 A restaurar sessões do ficheiro de segurança:', targetFile);
+    console.log('🔄 A carregar repositório permanente de sessões:', targetFile);
+    await dbQuery.run('DELETE FROM questions');
+    await dbQuery.run('DELETE FROM challenges');
+    await dbQuery.run('DELETE FROM weeks');
+
     for (let w of weeks) {
       const resW = await dbQuery.run('INSERT INTO weeks (number, name) VALUES (?, ?)', [w.number, w.name]);
       const weekId = resW.id;
@@ -177,10 +182,10 @@ async function autoRestoreBackupJSON() {
         }
       }
     }
-    console.log('✅ Sessões restauradas com sucesso a partir do backup!');
+    console.log('✅ Repositório permanente de sessões carregado com 100% de sucesso!');
     return true;
   } catch (err) {
-    console.error('Erro ao restaurar backup JSON:', err.message);
+    console.error('Erro ao restaurar repositório JSON:', err.message);
     return false;
   }
 }
