@@ -192,7 +192,7 @@
       } catch(e) {}
     }
 
-    socket.on('game_state_update', (state) => {
+    function renderProjectorState(state) {
       const currentOrigin = window.location.origin;
       const displayUrl = (state.serverUrl && !state.serverUrl.includes('10.31.')) ? state.serverUrl : currentOrigin;
 
@@ -254,7 +254,6 @@
       }
       else if (state.status === 'VOTING_CLOSED') {
         bannerClosed.style.display = 'block';
-        playBeep();
       }
       else if (state.status === 'REVEAL_ANSWER') {
         bannerClosed.style.display = 'none';
@@ -307,21 +306,12 @@
         timerBox.style.display = 'none';
         bannerClosed.style.display = 'none';
       }
-    });
+    }
 
-    socket.on('timer_tick', (data) => {
-      timerSec.innerText = data.seconds;
-      if (data.isWarning) {
-        timerBox.classList.add('timer-warning');
-      } else {
-        timerBox.classList.remove('timer-warning');
-      }
-    });
-
-    socket.on('leaderboard_update', (data) => {
-      if (data.challenge) {
+    function renderProjectorLeaderboards(challengeData, overallData) {
+      if (challengeData) {
         const tbodyChallenge = document.getElementById('tbody-challenge-leaderboard');
-        tbodyChallenge.innerHTML = data.challenge.map((t, idx) => `
+        tbodyChallenge.innerHTML = challengeData.map((t, idx) => `
           <tr>
             <td style="font-weight: 800; font-size: 1.2rem; color: ${idx === 0 ? 'var(--accent-gold)' : '#fff'}; font-family: var(--font-heading);">
               ${idx === 0 ? '🥇 1º' : idx === 1 ? '🥈 2º' : idx === 2 ? '🥉 3º' : '#' + (idx + 1)}
@@ -336,9 +326,9 @@
         `).join('');
       }
 
-      if (data.overall) {
+      if (overallData) {
         const tbodyOverall = document.getElementById('tbody-overall-leaderboard');
-        tbodyOverall.innerHTML = data.overall.map((t, idx) => `
+        tbodyOverall.innerHTML = overallData.map((t, idx) => `
           <tr>
             <td style="font-weight: 800; font-size: 1.2rem; color: ${idx === 0 ? 'var(--accent-gold)' : '#fff'}; font-family: var(--font-heading);">
               ${idx === 0 ? '🥇 1º' : idx === 1 ? '🥈 2º' : idx === 2 ? '🥉 3º' : '#' + (idx + 1)}
@@ -352,7 +342,43 @@
           </tr>
         `).join('');
       }
+    }
+
+    socket.on('game_state_update', (state) => {
+      renderProjectorState(state);
     });
+
+    socket.on('timer_tick', (data) => {
+      timerSec.innerText = data.seconds;
+      if (data.isWarning) {
+        timerBox.classList.add('timer-warning');
+      } else {
+        timerBox.classList.remove('timer-warning');
+      }
+    });
+
+    socket.on('leaderboard_update', (data) => {
+      renderProjectorLeaderboards(data.challenge, data.overall);
+    });
+
+    socket.on('connect', () => {
+      socket.emit('request_game_state');
+    });
+
+    // Heartbeat auto-sync contínuo a cada 2.5s (Elimina qualquer travamento)
+    setInterval(() => {
+      fetch('/api/game-state')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.state) {
+            renderProjectorState(data.state);
+            if (data.leaderboard || data.overall) {
+              renderProjectorLeaderboards(data.leaderboard, data.overall);
+            }
+          }
+        })
+        .catch(err => {});
+    }, 2500);
 
     function toggleFullscreen() {
       const btn = document.getElementById('btn-fullscreen');

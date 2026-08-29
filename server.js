@@ -582,11 +582,24 @@ app.get('/api/leaderboard/overall', async (req, res) => {
   }
 });
 
+// Obter estado publico do jogo em tempo real (fallback HTTP/REST para o Projector)
+app.get('/api/game-state', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  const state = buildPublicGameState();
+  const leaderboard = await db.getChallengeLeaderboard(gameState.activeChallengeId);
+  const overall = await db.getOverallTournamentLeaderboard();
+  res.json({ state, leaderboard, overall });
+});
+
 // --- WEBSOCKET EVENT HANDLERS ---
 
 io.on('connection', (socket) => {
   // Invia immediatamente lo stato corrente al nuovo connesso
   socket.emit('game_state_update', buildPublicGameState());
+
+  socket.on('request_game_state', () => {
+    socket.emit('game_state_update', buildPublicGameState());
+  });
 
   // Squadra si iscrive o si riconnette
   socket.on('team_join', async (teamData) => {
