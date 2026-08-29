@@ -582,10 +582,62 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
       });
     });
 
+    function showAdminNotification(msg) {
+      const toast = document.createElement('div');
+      toast.style.position = 'fixed';
+      toast.style.bottom = '20px';
+      toast.style.right = '20px';
+      toast.style.background = 'linear-gradient(135deg, var(--success-green), #047857)';
+      toast.style.color = '#fff';
+      toast.style.padding = '14px 24px';
+      toast.style.borderRadius = '12px';
+      toast.style.fontWeight = '700';
+      toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+      toast.style.zIndex = '9999';
+      toast.style.fontFamily = 'var(--font-heading)';
+      toast.innerText = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
     function loadWeeksAndChallenges(targetChallengeId = null) {
       fetch('/api/admin/weeks')
         .then(res => res.json())
         .then(weeks => {
+          // Se o servidor tiver sessões criadas, sincroniza e guarda a cópia mestre no navegador
+          if (Array.isArray(weeks) && weeks.length > 0) {
+            fetch('/api/admin/backup/export')
+              .then(r => r.json())
+              .then(fullBackup => {
+                if (Array.isArray(fullBackup) && fullBackup.length > 0) {
+                  localStorage.setItem('esagrada_saved_sessions_master', JSON.stringify(fullBackup));
+                }
+              }).catch(e => {});
+          } else {
+            // Se o servidor iniciou limpo após reinício do Render, restaura automaticamente a partir do navegador
+            const localBackup = localStorage.getItem('esagrada_saved_sessions_master');
+            if (localBackup) {
+              try {
+                const backupData = JSON.parse(localBackup);
+                if (Array.isArray(backupData) && backupData.length > 0) {
+                  fetch('/api/admin/backup/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(backupData)
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.success) {
+                      showAdminNotification('🛡️ Sessões restauradas automaticamente do teu navegador!');
+                      loadWeeksAndChallenges(targetChallengeId);
+                    }
+                  });
+                  return;
+                }
+              } catch(e) {}
+            }
+          }
+
           const select = document.getElementById('select-challenge');
           select.innerHTML = '';
           weeks.forEach(w => {
