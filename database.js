@@ -128,6 +128,7 @@ db.serialize(() => {
 });
 
 const backupFilePath = path.join(dataDir, 'sessions_backup.json');
+const masterFilePath = path.join(__dirname, 'data', 'sessions_master.json');
 
 async function autoSaveBackupJSON() {
   try {
@@ -138,20 +139,23 @@ async function autoSaveBackupJSON() {
         c.questions = await dbQuery.all('SELECT * FROM questions WHERE challenge_id = ? ORDER BY question_order ASC', [c.id]);
       }
     }
-    fs.writeFileSync(backupFilePath, JSON.stringify(weeks, null, 2), 'utf8');
+    const jsonStr = JSON.stringify(weeks, null, 2);
+    fs.writeFileSync(backupFilePath, jsonStr, 'utf8');
+    try { fs.writeFileSync(masterFilePath, jsonStr, 'utf8'); } catch(e) {}
   } catch (err) {
     console.error('Erro ao auto-guardar backup JSON:', err.message);
   }
 }
 
 async function autoRestoreBackupJSON() {
-  if (!fs.existsSync(backupFilePath)) return false;
+  const targetFile = fs.existsSync(backupFilePath) ? backupFilePath : (fs.existsSync(masterFilePath) ? masterFilePath : null);
+  if (!targetFile) return false;
   try {
-    const raw = fs.readFileSync(backupFilePath, 'utf8');
+    const raw = fs.readFileSync(targetFile, 'utf8');
     const weeks = JSON.parse(raw);
     if (!Array.isArray(weeks) || weeks.length === 0) return false;
 
-    console.log('🔄 A restaurar sessões do ficheiro de segurança...');
+    console.log('🔄 A restaurar sessões do ficheiro de segurança:', targetFile);
     for (let w of weeks) {
       const resW = await dbQuery.run('INSERT INTO weeks (number, name) VALUES (?, ?)', [w.number, w.name]);
       const weekId = resW.id;

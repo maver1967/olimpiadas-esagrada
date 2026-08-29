@@ -158,8 +158,12 @@
                 📥 Baixar CSV
               </button>
               <button onclick="downloadSessionsBackup()" class="btn-primary" style="background: linear-gradient(135deg, #6366f1, #4338ca);">
-                💾 Backup Sessões
+                💾 Baixar Backup
               </button>
+              <button onclick="document.getElementById('file-input-backup').click()" class="btn-primary" style="background: linear-gradient(135deg, #059669, #047857);">
+                📥 Carregar Backup JSON
+              </button>
+              <input type="file" id="file-input-backup" accept=".json" style="display: none;" onchange="uploadBackupJSONFile(event)">
               <button onclick="openNewQuestionModal()" class="btn-success">+ Adicionar Pergunta</button>
             </div>
           </div>
@@ -506,6 +510,40 @@ Filosofia | Quem é o pai da filosofia? | Aristóteles | Tales de Mileto | Plat�
 
     function downloadSessionsBackup() {
       window.location.href = '/api/admin/backup/export';
+    }
+
+    function uploadBackupJSONFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const backupData = JSON.parse(e.target.result);
+          if (!Array.isArray(backupData)) {
+            alert('Formato de ficheiro de backup inválido.');
+            return;
+          }
+
+          fetch('/api/admin/backup/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(backupData)
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              showAdminNotification('🛡️ Cópia de segurança restaurada com sucesso!');
+              loadWeeksAndChallenges();
+            } else {
+              alert('Erro ao restaurar backup: ' + (data.message || 'Erro desconhecido'));
+            }
+          });
+        } catch(err) {
+          alert('Ficheiro JSON inválido: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
     }
 
     // Form Login PIN
