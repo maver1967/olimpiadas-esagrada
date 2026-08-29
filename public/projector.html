@@ -205,18 +205,20 @@
         document.getElementById('projector-qr').src = state.teamQrCodeUrl;
       }
 
-      if (state.connectedTeams) {
-        document.getElementById('connected-count').innerText = state.connectedTeams.length;
-        const grid = document.getElementById('teams-grid');
-        if (state.connectedTeams.length === 0) {
-          grid.innerHTML = '<p style="color: var(--text-muted);">À espera das equipas...</p>';
-        } else {
-          grid.innerHTML = state.connectedTeams.map(t => `
-            <span class="team-badge-pill" style="background-color: ${t.color};">
-              ${t.name}
-            </span>
-          `).join('');
-        }
+      const teamsList = Array.isArray(state.connectedTeams) 
+        ? state.connectedTeams 
+        : (state.connectedTeams ? Object.values(state.connectedTeams) : []);
+
+      document.getElementById('connected-count').innerText = teamsList.length;
+      const grid = document.getElementById('teams-grid');
+      if (teamsList.length === 0) {
+        grid.innerHTML = '<p style="color: var(--text-muted);">À espera das equipas...</p>';
+      } else {
+        grid.innerHTML = teamsList.map(t => `
+          <span class="team-badge-pill" style="background-color: ${t.color || '#3b82f6'};">
+            ${t.name}
+          </span>
+        `).join('');
       }
 
       // Gestione visualização por estado

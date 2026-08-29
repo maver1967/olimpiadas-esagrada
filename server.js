@@ -213,6 +213,8 @@ function buildPublicGameState() {
     });
   }
 
+  const teamsList = Object.values(gameState.connectedTeams || {});
+
   return {
     status: gameState.status,
     activeChallengeId: gameState.activeChallengeId,
@@ -223,7 +225,7 @@ function buildPublicGameState() {
     activeQuestion: safeQuestion,
     completedQuestionIds: gameState.completedQuestionIds || [],
     responses: gameState.responses || {},
-    connectedTeams: gameState.connectedTeams || {},
+    connectedTeams: teamsList,
     roundOutcomes: {
       correct: teamOutcomes.filter(t => t.isCorrect),
       incorrect: teamOutcomes.filter(t => !t.isCorrect)
@@ -232,7 +234,7 @@ function buildPublicGameState() {
     timerMax: gameState.timerMax,
     serverUrl: serverUrl,
     teamQrCodeUrl: teamQrCodeUrl,
-    teamsCount: Object.keys(gameState.connectedTeams).length,
+    teamsCount: teamsList.length,
     votedCount: Object.keys(gameState.responses).length
   };
 }
