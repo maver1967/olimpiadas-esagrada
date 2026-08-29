@@ -1,62 +1,63 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Olimpiadas ESagrada - Proiettore</title>
+  <title>Olimpíadas ESagrada - Projector</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="/socket.io/socket.io.js"></script>
 </head>
-<body style="background: #090d16;">
+<body style="background: var(--bg-darker);">
 
   <div class="projector-layout">
     
     <!-- HEADER PROIETTORE -->
     <div class="projector-header glass-panel">
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <h1 class="brand-title" style="font-size: 2rem;">🏆 OLIMPIADAS ESAGRADA</h1>
+      <div style="display: flex; align-items: center; gap: 18px;">
+        <h1 class="brand-title" style="font-size: 2.2rem;">🏆 OLIMPÍADAS ESAGRADA</h1>
         <span class="challenge-info" id="active-challenge-title">Desafio em espera</span>
       </div>
 
       <div style="display: flex; align-items: center; gap: 15px;">
-        <!-- TIMER CIRCOLARE / NUMERICO 15 SECONDI -->
+        <!-- TIMER NUMÉRICO & BARRA DE PROGRESSO -->
         <div class="timer-container" id="timer-box" style="display: none;">
-          <span style="font-weight: 700; color: var(--text-muted); font-size: 1rem;">TEMPO:</span>
+          <span style="font-weight: 800; color: var(--text-muted); font-size: 1rem; letter-spacing: 1px;">TEMPO:</span>
           <div class="timer-display" id="timer-seconds">15</div>
         </div>
 
         <!-- BOTÃO ECRÃ INTEIRO (FULLSCREEN) -->
-        <button id="btn-fullscreen" onclick="toggleFullscreen()" class="btn-primary" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; font-size: 0.95rem; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+        <button id="btn-fullscreen" onclick="toggleFullscreen()" class="btn-secondary" style="padding: 8px 18px; font-size: 0.95rem; border-radius: 20px;">
           ⛶ Ecrã Inteiro
         </button>
       </div>
     </div>
 
     <!-- MAIN CONTENT AREA -->
-    <div id="main-content" style="flex: 1; display: flex; flex-direction: column;">
+    <div id="main-content" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
       
       <!-- SCHERMATA ATTESA LOBBY CON QR CODE -->
-      <div id="view-lobby" class="glass-panel" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center;">
-        <h2 style="font-family: var(--font-heading); font-size: 3rem; color: var(--accent-gold); margin-bottom: 20px;">
+      <div id="view-lobby" class="glass-panel-gold" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center;">
+        <h2 style="font-family: var(--font-heading); font-size: 3.2rem; color: var(--accent-gold); margin-bottom: 15px; text-shadow: 0 0 20px var(--accent-gold-glow);">
           CONECTA O TEU TELEMÓVEL
         </h2>
-        <p style="font-size: 1.5rem; margin-bottom: 25px; color: var(--text-muted);">
-          Digitaliza o QR Code para inscreveres a tua equipa e entrares no jogo!
+        <p style="font-size: 1.4rem; margin-bottom: 25px; color: var(--text-muted);">
+          Digitaliza o QR Code abaixo para juntares a tua equipa ao jogo!
         </p>
 
-        <div style="display: flex; gap: 50px; align-items: center; margin-bottom: 30px;">
-          <img id="projector-qr" src="" alt="QR Code" style="width: 250px; height: 250px; border-radius: 20px; border: 6px solid var(--accent-gold); box-shadow: 0 0 40px var(--accent-gold-glow);">
+        <div style="display: flex; gap: 50px; align-items: center; margin-bottom: 25px;">
+          <img id="projector-qr" src="" alt="QR Code" style="width: 240px; height: 240px; border-radius: 20px; border: 5px solid var(--accent-gold); box-shadow: 0 0 40px var(--accent-gold-glow);">
           
           <div style="text-align: left;">
-            <h3 style="font-size: 1.8rem; margin-bottom: 15px; color: #fff;">Equipas Conectadas (<span id="connected-count">0</span>):</h3>
-            <div id="teams-grid" style="display: flex; flex-wrap: wrap; gap: 12px; max-width: 500px;">
-              <!-- Badge equipas connesse -->
-              <p style="color: var(--text-muted);">À espera das equipas...</p>
+            <h3 style="font-size: 1.8rem; margin-bottom: 15px; color: #fff; font-family: var(--font-heading);">
+              Equipas Conectadas (<span id="connected-count" style="color: var(--accent-gold);">0</span>):
+            </h3>
+            <div id="teams-grid" style="display: flex; flex-wrap: wrap; gap: 12px; max-width: 520px; max-height: 220px; overflow-y: auto;">
+              <p style="color: var(--text-muted); font-size: 1.1rem;">À espera do registo das equipas...</p>
             </div>
           </div>
         </div>
 
-        <p style="font-size: 1.2rem; background: rgba(255,255,255,0.05); padding: 12px 25px; border-radius: 30px;" id="projector-ip-text">
+        <p style="font-size: 1.2rem; background: rgba(255,255,255,0.06); padding: 12px 28px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.15);" id="projector-ip-text">
           Ou digita no navegador do telemóvel: <strong>http://...</strong>
         </p>
       </div>
@@ -65,7 +66,7 @@
       <div id="view-question" class="question-card-projector glass-panel" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
           <span class="category-badge" id="q-category">Geral</span>
-          <span style="font-size: 1.4rem; font-weight: 700; color: var(--accent-gold);" id="q-progress">Pergunta 1 de 10</span>
+          <span style="font-size: 1.4rem; font-weight: 800; color: var(--accent-gold); font-family: var(--font-heading);" id="q-progress">Pergunta 1 de 10</span>
         </div>
 
         <h2 class="question-text-projector" id="q-text">
@@ -93,24 +94,24 @@
         </div>
 
         <!-- SEZIONE ESITO SQUADRE (CHI HA INDOVINATO E CHI HA SBAGLIATO) -->
-        <div id="team-outcomes-container" style="display: none; margin-top: 25px; background: rgba(15, 23, 42, 0.85); padding: 20px 30px; border-radius: 16px; border: 2px solid var(--accent-gold);">
-          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--accent-gold); margin-bottom: 15px;">
+        <div id="team-outcomes-container" style="display: none; margin-top: 18px; background: rgba(15, 23, 42, 0.95); padding: 18px 25px; border-radius: 18px; border: 2px solid var(--accent-gold);">
+          <h3 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--accent-gold); margin-bottom: 12px;">
             📊 RESUMO DAS RESPOSTAS DAS EQUIPAS
           </h3>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; text-align: left;">
             <!-- Squadre Corrette -->
-            <div style="background: rgba(16, 185, 129, 0.15); padding: 15px; border-radius: 12px; border: 1px solid var(--success-green);">
-              <h4 style="color: var(--success-green); font-size: 1.2rem; margin-bottom: 10px;">✅ Acertaram (+1pt):</h4>
-              <div id="correct-teams-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div style="background: rgba(16, 185, 129, 0.12); padding: 14px; border-radius: 14px; border: 1px solid var(--success-green);">
+              <h4 style="color: var(--success-green); font-size: 1.15rem; margin-bottom: 10px; font-family: var(--font-heading);">✅ Acertaram (+1pt):</h4>
+              <div id="correct-teams-list" style="display: flex; flex-wrap: wrap; gap: 8px;">
                 <!-- Generato via JS -->
               </div>
             </div>
 
             <!-- Squadre Errate / Non risposte -->
-            <div style="background: rgba(239, 68, 68, 0.15); padding: 15px; border-radius: 12px; border: 1px solid var(--danger-red);">
-              <h4 style="color: var(--danger-red); font-size: 1.2rem; margin-bottom: 10px;">❌ Erraram / Tempo Esgotado:</h4>
-              <div id="incorrect-teams-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div style="background: rgba(239, 68, 68, 0.12); padding: 14px; border-radius: 14px; border: 1px solid var(--danger-red);">
+              <h4 style="color: var(--danger-red); font-size: 1.15rem; margin-bottom: 10px; font-family: var(--font-heading);">❌ Erraram / Tempo Esgotado:</h4>
+              <div id="incorrect-teams-list" style="display: flex; flex-wrap: wrap; gap: 8px;">
                 <!-- Generato via JS -->
               </div>
             </div>
@@ -118,21 +119,21 @@
         </div>
       </div>
 
-      <!-- BANNER "VOTAZIONE CHIUSA" -->
+      <!-- BANNER "VOTATION CLOSED" -->
       <div id="banner-voting-closed" class="voting-closed-banner" style="display: none;">
         ⏰ VOTAÇÃO ENCERRADA!
       </div>
 
       <!-- SCHERMATA CLASSIFICA ROUND & GENERALE -->
-      <div id="view-leaderboard" class="glass-panel" style="flex: 1; padding: 40px; display: none; flex-direction: column;">
-        <h2 style="font-family: var(--font-heading); font-size: 2.8rem; color: var(--accent-gold); margin-bottom: 20px; text-align: center;" id="leaderboard-title">
+      <div id="view-leaderboard" class="glass-panel-gold" style="flex: 1; padding: 30px 40px; display: none; flex-direction: column;">
+        <h2 style="font-family: var(--font-heading); font-size: 2.6rem; color: var(--accent-gold); margin-bottom: 20px; text-align: center;" id="leaderboard-title">
           📊 RESULTADOS E CLASSIFICAÇÃO
         </h2>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex: 1;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; flex: 1;">
           <!-- Classifica Sfida Corrente -->
-          <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 16px;">
-            <h3 style="font-size: 1.6rem; color: var(--primary-blue); margin-bottom: 15px;">🎯 Pontuação do Desafio Actual</h3>
+          <div style="background: rgba(15, 23, 42, 0.7); padding: 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="font-size: 1.5rem; color: var(--primary-blue); margin-bottom: 15px; font-family: var(--font-heading);">🎯 Pontuação do Desafio Actual</h3>
             <table class="leaderboard-table">
               <thead>
                 <tr>
@@ -148,8 +149,8 @@
           </div>
 
           <!-- Classifica Generale del Torneo -->
-          <div style="background: rgba(15, 23, 42, 0.6); padding: 20px; border-radius: 16px; border: 2px solid var(--accent-gold);">
-            <h3 style="font-size: 1.6rem; color: var(--accent-gold); margin-bottom: 15px;">👑 Classificação Geral do Torneio</h3>
+          <div style="background: rgba(15, 23, 42, 0.7); padding: 20px; border-radius: 18px; border: 2px solid var(--accent-gold);">
+            <h3 style="font-size: 1.5rem; color: var(--accent-gold); margin-bottom: 15px; font-family: var(--font-heading);">👑 Classificação Geral do Torneio</h3>
             <table class="leaderboard-table">
               <thead>
                 <tr>
@@ -179,7 +180,6 @@
     const timerBox = document.getElementById('timer-box');
     const timerSec = document.getElementById('timer-seconds');
 
-    // Suoni di avviso o sintesi per fine tempo (opzionale)
     function playBeep() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -193,37 +193,52 @@
     }
 
     socket.on('game_state_update', (state) => {
-      // Usa l'origine del browser se serverUrl contiene l'IP del container interno
       const currentOrigin = window.location.origin;
       const displayUrl = (state.serverUrl && !state.serverUrl.includes('10.31.')) ? state.serverUrl : currentOrigin;
 
-      // Titolo sfida
       document.getElementById('active-challenge-title').innerText = 
         (state.activeWeekName ? state.activeWeekName + ' - ' : '') + state.activeChallengeTitle;
       
       document.getElementById('projector-ip-text').innerHTML = 
-        `Accedi dal tuo smartphone: <strong>${displayUrl}/team.html</strong>`;
+        `Accedi dal tuo smartphone: <strong style="color: var(--accent-gold);">${displayUrl}/team.html</strong>`;
       if (state.teamQrCodeUrl) {
         document.getElementById('projector-qr').src = state.teamQrCodeUrl;
       }
 
-      // Reset visibilità
-      viewLobby.style.display = 'none';
-      viewQuestion.style.display = 'none';
-      viewLeaderboard.style.display = 'none';
-      bannerClosed.style.display = 'none';
-      timerBox.style.display = 'none';
+      if (state.connectedTeams) {
+        document.getElementById('connected-count').innerText = state.connectedTeams.length;
+        const grid = document.getElementById('teams-grid');
+        if (state.connectedTeams.length === 0) {
+          grid.innerHTML = '<p style="color: var(--text-muted);">À espera das equipas...</p>';
+        } else {
+          grid.innerHTML = state.connectedTeams.map(t => `
+            <span class="team-badge-pill" style="background-color: ${t.color};">
+              ${t.name}
+            </span>
+          `).join('');
+        }
+      }
 
+      // Gestione visualização por estado
       if (state.status === 'LOBBY') {
         viewLobby.style.display = 'flex';
-      } 
-      else if (state.status === 'QUESTION_ACTIVE' || state.status === 'VOTING_CLOSED' || state.status === 'REVEAL_ANSWER') {
+        viewQuestion.style.display = 'none';
+        viewLeaderboard.style.display = 'none';
+        bannerClosed.style.display = 'none';
+        timerBox.style.display = 'none';
+      }
+      else if (state.status === 'QUESTION_ACTIVE') {
+        viewLobby.style.display = 'none';
         viewQuestion.style.display = 'flex';
+        viewLeaderboard.style.display = 'none';
+        bannerClosed.style.display = 'none';
         timerBox.style.display = 'flex';
 
+        document.getElementById('team-outcomes-container').style.display = 'none';
+
         if (state.activeQuestion) {
-          document.getElementById('q-category').innerText = state.activeQuestion.category || 'Generale';
-          document.getElementById('q-progress').innerText = `Domanda ${state.currentQuestionIndex + 1} di ${state.totalQuestions}`;
+          document.getElementById('q-category').innerText = state.activeQuestion.category || 'Geral';
+          document.getElementById('q-progress').innerText = `Pergunta ${state.currentQuestionIndex + 1} de ${state.totalQuestions}`;
           document.getElementById('q-text').innerText = state.activeQuestion.text;
 
           document.getElementById('text-opt-A').innerText = state.activeQuestion.option_a;
@@ -231,109 +246,92 @@
           document.getElementById('text-opt-C').innerText = state.activeQuestion.option_c;
           document.getElementById('text-opt-D').innerText = state.activeQuestion.option_d;
 
-          // Pulisce evidenziazioni precedenti
           ['A', 'B', 'C', 'D'].forEach(opt => {
-            const el = document.getElementById(`box-opt-${opt}`);
-            el.classList.remove('correct', 'incorrect');
+            const box = document.getElementById(`box-opt-${opt}`);
+            box.className = 'option-box-projector';
           });
-
-          // Mostra risposta corretta e riepilogo squadre quando in REVEAL_ANSWER
-          const outcomesContainer = document.getElementById('team-outcomes-container');
-          if (state.status === 'REVEAL_ANSWER' && state.activeQuestion.correct_option) {
-            const correct = state.activeQuestion.correct_option.toUpperCase();
-            ['A', 'B', 'C', 'D'].forEach(opt => {
-              const el = document.getElementById(`box-opt-${opt}`);
-              if (opt === correct) {
-                el.classList.add('correct');
-              } else {
-                el.classList.add('incorrect');
-              }
-            });
-
-            // Popola l'esito visivo per ciascuna squadra
-            if (state.teamOutcomes && state.teamOutcomes.length > 0) {
-              outcomesContainer.style.display = 'block';
-
-              const correctTeams = state.teamOutcomes.filter(t => t.isCorrect);
-              const incorrectTeams = state.teamOutcomes.filter(t => !t.isCorrect);
-
-              const correctList = document.getElementById('correct-teams-list');
-              const incorrectList = document.getElementById('incorrect-teams-list');
-
-              if (correctTeams.length > 0) {
-                correctList.innerHTML = correctTeams.map(t => `
-                  <div class="team-badge-pill" style="background-color: ${t.color}; box-shadow: 0 4px 10px ${t.color}66; font-size: 1.1rem; padding: 8px 16px;">
-                    <span>${t.name} (${t.selectedOption})</span> ✅
-                  </div>
-                `).join('');
-              } else {
-                correctList.innerHTML = '<p style="color: var(--text-muted); font-size: 1rem;">Nessuna squadra ha indovinato.</p>';
-              }
-
-              if (incorrectTeams.length > 0) {
-                incorrectList.innerHTML = incorrectTeams.map(t => `
-                  <div class="team-badge-pill" style="background-color: ${t.color}; opacity: 0.8; font-size: 1rem; padding: 6px 14px;">
-                    <span>${t.name} ${t.selectedOption ? '(' + t.selectedOption + ')' : '(Scaduta)'}</span> ❌
-                  </div>
-                `).join('');
-              } else {
-                incorrectList.innerHTML = '<p style="color: var(--text-muted); font-size: 1rem;">Nessun errore!</p>';
-              }
-            }
-          } else {
-            outcomesContainer.style.display = 'none';
-          }
-        }
-
-        // Banner Scelta Chiusa
-        if (state.status === 'VOTING_CLOSED') {
-          bannerClosed.style.display = 'block';
         }
       }
-      else if (state.status === 'ROUND_RESULTS' || state.status === 'TOURNAMENT_LEADERBOARD') {
+      else if (state.status === 'VOTING_CLOSED') {
+        bannerClosed.style.display = 'block';
+        playBeep();
+      }
+      else if (state.status === 'REVEAL_ANSWER') {
+        bannerClosed.style.display = 'none';
+        timerBox.style.display = 'none';
+        viewQuestion.style.display = 'flex';
+
+        if (state.activeQuestion && state.activeQuestion.correct_option) {
+          const correctOpt = state.activeQuestion.correct_option.toUpperCase();
+          ['A', 'B', 'C', 'D'].forEach(opt => {
+            const box = document.getElementById(`box-opt-${opt}`);
+            if (opt === correctOpt) {
+              box.className = 'option-box-projector correct';
+            } else {
+              box.className = 'option-box-projector incorrect';
+            }
+          });
+        }
+
+        if (state.roundOutcomes) {
+          const outcomesBox = document.getElementById('team-outcomes-container');
+          outcomesBox.style.display = 'block';
+
+          const correctList = document.getElementById('correct-teams-list');
+          const incorrectList = document.getElementById('incorrect-teams-list');
+
+          if (state.roundOutcomes.correct.length === 0) {
+            correctList.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">Nenhuma equipa acertou.</span>';
+          } else {
+            correctList.innerHTML = state.roundOutcomes.correct.map(t => `
+              <span class="team-badge-pill" style="background-color: ${t.color};">
+                ${t.name}
+              </span>
+            `).join('');
+          }
+
+          if (state.roundOutcomes.incorrect.length === 0) {
+            incorrectList.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">Todas as equipas acertaram! 🎉</span>';
+          } else {
+            incorrectList.innerHTML = state.roundOutcomes.incorrect.map(t => `
+              <span class="team-badge-pill" style="background-color: ${t.color}; opacity: 0.85;">
+                ${t.name} (${t.selectedOption || 'N/A'})
+              </span>
+            `).join('');
+          }
+        }
+      }
+      else if (state.status === 'ROUND_RESULTS') {
+        viewQuestion.style.display = 'none';
         viewLeaderboard.style.display = 'flex';
+        timerBox.style.display = 'none';
+        bannerClosed.style.display = 'none';
       }
     });
 
-    // Aggiornamento Timer 15s
     socket.on('timer_tick', (data) => {
       timerSec.innerText = data.seconds;
       if (data.isWarning) {
-        timerSec.classList.add('timer-warning');
-        playBeep();
+        timerBox.classList.add('timer-warning');
       } else {
-        timerSec.classList.remove('timer-warning');
+        timerBox.classList.remove('timer-warning');
       }
     });
 
-    // Aggiornamento Lista Squadre Connesse
-    socket.on('teams_list_update', (teams) => {
-      document.getElementById('connected-count').innerText = teams.length;
-      const grid = document.getElementById('teams-grid');
-      if (teams.length === 0) {
-        grid.innerHTML = '<p style="color: var(--text-muted);">In attesa delle squadre...</p>';
-        return;
-      }
-      grid.innerHTML = teams.map(t => `
-        <div class="team-badge-pill" style="background-color: ${t.color}; box-shadow: 0 4px 12px ${t.color}66;">
-          <span style="color: #fff; text-shadow: 0 1px 2px #000;">${t.name}</span>
-        </div>
-      `).join('');
-    });
-
-    // Aggiornamento Classifiche
     socket.on('leaderboard_update', (data) => {
       if (data.challenge) {
         const tbodyChallenge = document.getElementById('tbody-challenge-leaderboard');
         tbodyChallenge.innerHTML = data.challenge.map((t, idx) => `
           <tr>
-            <td style="font-weight: 800; font-size: 1.2rem; color: ${idx === 0 ? 'var(--accent-gold)' : '#fff'};">#${idx + 1}</td>
+            <td style="font-weight: 800; font-size: 1.2rem; color: ${idx === 0 ? 'var(--accent-gold)' : '#fff'}; font-family: var(--font-heading);">
+              ${idx === 0 ? '🥇 1º' : idx === 1 ? '🥈 2º' : idx === 2 ? '🥉 3º' : '#' + (idx + 1)}
+            </td>
             <td>
               <span class="team-badge-pill" style="background-color: ${t.color};">
                 ${t.name}
               </span>
             </td>
-            <td style="text-align: right; font-weight: 800; font-size: 1.3rem; color: var(--success-green);">${t.score} pt</td>
+            <td style="text-align: right; font-weight: 800; font-size: 1.3rem; color: var(--success-green); font-family: var(--font-heading);">${t.score} pt</td>
           </tr>
         `).join('');
       }
@@ -342,15 +340,15 @@
         const tbodyOverall = document.getElementById('tbody-overall-leaderboard');
         tbodyOverall.innerHTML = data.overall.map((t, idx) => `
           <tr>
-            <td style="font-weight: 800; font-size: 1.2rem; color: ${idx === 0 ? 'var(--accent-gold)' : '#fff'};">
-              ${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '#' + (idx + 1)}
+            <td style="font-weight: 800; font-size: 1.2rem; color: ${idx === 0 ? 'var(--accent-gold)' : '#fff'}; font-family: var(--font-heading);">
+              ${idx === 0 ? '🥇 1º' : idx === 1 ? '🥈 2º' : idx === 2 ? '🥉 3º' : '#' + (idx + 1)}
             </td>
             <td>
               <span class="team-badge-pill" style="background-color: ${t.color};">
                 ${t.name}
               </span>
             </td>
-            <td style="text-align: right; font-weight: 800; font-size: 1.3rem; color: var(--accent-gold);">${t.total_score} pt</td>
+            <td style="text-align: right; font-weight: 800; font-size: 1.3rem; color: var(--accent-gold); font-family: var(--font-heading);">${t.total_score} pt</td>
           </tr>
         `).join('');
       }

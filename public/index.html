@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Olimpiadas ESagrada - Torneo Quiz Intranet</title>
+  <title>Olimpíadas ESagrada - Torneio de Quiz em Direto</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#f59e0b">
@@ -11,47 +11,56 @@
 <body>
 
   <div class="hero-container">
-    <h1 class="brand-title" style="font-size: 3.2rem; margin-bottom: 10px;">🏆 Olimpiadas ESagrada</h1>
-    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 25px;">
-      Sistema de Quiz em Equipas em Tempo Real para a Escola
+    <h1 class="brand-title" style="font-size: 3.4rem; margin-bottom: 12px;">🏆 OLIMPÍADAS ESAGRADA</h1>
+    <p class="brand-subtitle" style="font-size: 1.3rem; margin-bottom: 30px;">
+      Plataforma Escolar de Quiz Interactivo em Tempo Real
     </p>
 
-    <div id="ip-info-box" class="glass-panel" style="padding: 20px; margin-bottom: 30px;">
-      <h3 style="color: var(--accent-gold); margin-bottom: 10px;">📶 Conexão ao Jogo</h3>
-      <p style="font-size: 1.1rem;" id="server-url-display">A carregar endereço do servidor...</p>
-      <div id="qr-code-wrapper" style="margin-top: 15px;">
-        <img id="qr-code-img" src="" alt="QR Code de Conexão" style="width: 180px; height: 180px; border-radius: 12px; border: 4px solid var(--accent-gold);">
+    <div id="ip-info-box" class="glass-panel-gold" style="padding: 25px; margin-bottom: 35px; border-radius: 20px;">
+      <h3 style="color: var(--accent-gold); font-family: var(--font-heading); font-size: 1.4rem; margin-bottom: 12px;">
+        📶 Conexão das Equipas
+      </h3>
+      <p style="font-size: 1.15rem; color: var(--text-main);" id="server-url-display">A carregar endereço de rede...</p>
+      
+      <div id="qr-code-wrapper" style="margin-top: 18px;">
+        <img id="qr-code-img" src="" alt="QR Code de Conexão" style="width: 190px; height: 190px; border-radius: 16px; border: 4px solid var(--accent-gold); box-shadow: 0 0 25px var(--accent-gold-glow);">
       </div>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 10px;">
-        Digitaliza o QR Code com o teu smartphone para entrares como equipa
+      
+      <p style="font-size: 0.95rem; color: var(--text-muted); margin-top: 14px;">
+        📱 Aponta a câmara do telemóvel para o QR Code para juntares a tua equipa ao jogo!
       </p>
     </div>
 
-    <h2 style="font-family: var(--font-heading); margin-bottom: 20px;">Escolhe o teu papel:</h2>
+    <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 25px; color: var(--text-main);">
+      Selecciona o Portal de Acesso:
+    </h2>
 
     <div class="role-cards">
       <a href="/team.html" class="role-card glass-panel">
         <span class="role-icon">📱</span>
-        <h3 style="font-size: 1.5rem;">Participar como Equipa</h3>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">
-          Digitaliza o QR Code do teu telemóvel, escolhe o nome da equipa, a cor e responde às perguntas em 15 segundos!
+        <h3 style="font-size: 1.6rem; font-family: var(--font-heading); color: var(--accent-gold);">Participar como Equipa</h3>
+        <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.5;">
+          Regista a tua equipa no telemóvel, escolhe a tua cor e responde às perguntas em 15 segundos!
         </p>
+        <span class="btn-primary" style="margin-top: 10px; width: 100%;">Entrar como Equipa &rarr;</span>
       </a>
 
       <a href="/projector.html" class="role-card glass-panel">
         <span class="role-icon">📺</span>
-        <h3 style="font-size: 1.5rem;">Ecrã do Projector</h3>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">
-          Para projectar na sala de aula/auditório. Perguntas grandes, cronómetro de 15s animado, resposta certa e pontuações em directo.
+        <h3 style="font-size: 1.6rem; font-family: var(--font-heading); color: var(--cyan-accent);">Ecrã do Projector</h3>
+        <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.5;">
+          Modo apresentação para auditório e salas de aula. Perguntas gigantes, tempo animado e pódio em direto.
         </p>
+        <span class="btn-primary" style="background: linear-gradient(135deg, var(--cyan-accent), #0284c7); margin-top: 10px; width: 100%;">Abrir Projector &rarr;</span>
       </a>
 
       <a href="/admin.html" class="role-card glass-panel">
         <span class="role-icon">🎛️</span>
-        <h3 style="font-size: 1.5rem;">Painel de Controlo Admin</h3>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">
-          Acessível com PIN a partir de qualquer computador ou telemóvel. Carrega as perguntas, controla o jogo e gere o torneio.
+        <h3 style="font-size: 1.6rem; font-family: var(--font-heading); color: var(--purple-accent);">Painel da Regia Admin</h3>
+        <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.5;">
+          Painel de controlo completo com PIN. Gere sessões, importa texto da IA, ajusta pontuações e controla os tempos.
         </p>
+        <span class="btn-primary" style="background: linear-gradient(135deg, var(--purple-accent), #6d28d9); margin-top: 10px; width: 100%;">Abrir Painel Admin &rarr;</span>
       </a>
     </div>
   </div>
@@ -61,13 +70,13 @@
       .then(res => res.json())
       .then(data => {
         document.getElementById('server-url-display').innerHTML = 
-          `Accedi dal tuo smartphone alla stessa rete Wi-Fi: <br><strong style="font-size: 1.4rem; color: #fff;">${data.serverUrl}/team.html</strong>`;
+          `Digita no navegador do telemóvel: <br><strong style="font-size: 1.35rem; color: var(--accent-gold); display: inline-block; margin-top: 5px;">${data.serverUrl}/team.html</strong>`;
         if (data.qrCode) {
           document.getElementById('qr-code-img').src = data.qrCode;
         }
       })
       .catch(err => {
-        document.getElementById('server-url-display').innerText = "Impossibile caricare info rete.";
+        document.getElementById('server-url-display').innerText = "Servidor activo em modo Intranet.";
       });
 
     if ('serviceWorker' in navigator) {
