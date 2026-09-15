@@ -284,5 +284,162 @@
         ]
       }
     ]
+  },
+  {
+    "id": 4,
+    "number": 1789463381336,
+    "name": "prova de filosofia 1",
+    "created_at": "2026-09-15 09:09:42",
+    "challenges": [
+      {
+        "id": 4,
+        "week_id": 4,
+        "title": "Perguntas da Sessão",
+        "status": "draft",
+        "created_at": "2026-09-15 09:09:42",
+        "questions": [
+          {
+            "id": 27,
+            "challenge_id": 4,
+            "question_order": 1,
+            "category": "Filosofia",
+            "text": "Segundo Immanuel Kant, o que é o Imperativo Categórico?",
+            "option_a": "Regra do prazer",
+            "option_b": "Princípio moral incondicional que deve valer como lei universal",
+            "option_c": "Ordem do Estado",
+            "option_d": "Hipótese científica",
+            "correct_option": "B",
+            "points": 1,
+            "time_limit": 15
+          },
+          {
+            "id": 28,
+            "challenge_id": 4,
+            "question_order": 2,
+            "category": "Filosofia",
+            "text": "Quem é considerado o pai da Filosofia ocidental?",
+            "option_a": "Aristóteles",
+            "option_b": "Tales de Mileto",
+            "option_c": "Platão",
+            "option_d": "Sócrates",
+            "correct_option": "B",
+            "points": 1,
+            "time_limit": 15
+          },
+          {
+            "id": 29,
+            "challenge_id": 4,
+            "question_order": 3,
+            "category": "Filosofia",
+            "text": "Qual é o significado etimológico da palavra Filosofia?",
+            "option_a": "Amor à sabedoria",
+            "option_b": "Ciência dos deuses",
+            "option_c": "Estudo da natureza",
+            "option_d": "Arte de falar",
+            "correct_option": "A",
+            "points": 1,
+            "time_limit": 15
+          },
+          {
+            "id": 30,
+            "challenge_id": 4,
+            "question_order": 4,
+            "category": "Filosofia",
+            "text": "Qual filósofo disse a famosa frase 'Só sei que nada sei'?",
+            "option_a": "Platão",
+            "option_b": "Sócrates",
+            "option_c": "Descartes",
+            "option_d": "Kant",
+            "correct_option": "B",
+            "points": 1,
+            "time_limit": 15
+          },
+          {
+            "id": 31,
+            "challenge_id": 4,
+            "question_order": 5,
+            "category": "Filosofia",
+            "text": "Quem escreveu a frase 'Penso, logo existo' (Cogito ergo sum)?",
+            "option_a": "René Descartes",
+            "option_b": "John Locke",
+            "option_c": "Spinoza",
+            "option_d": "Nietzsche",
+            "correct_option": "A",
+            "points": 1,
+            "time_limit": 15
+          },
+          {
+            "id": 32,
+            "challenge_id": 4,
+            "question_order": 6,
+            "category": "Filosofia",
+            "text": "O que caracteriza o mito da caverna de Platão?",
+            "option_a": "A passagem da ilusão das sombras para a luz da verdade",
+            "option_b": "A origem dos deuses",
+            "option_c": "O contrato social",
+            "option_d": "Negação da alma",
+            "correct_option": "A",
+            "points": 1,
+            "time_limit": 15
+          },
+          {
+            "id": 33,
+            "challenge_id": 4,
+            "question_order": 7,
+            "category": "Filosofia",
+            "text": "Na lógica aristotélica, o que é um silogismo?",
+            "option_a": "Um poema",
+            "option_b": "Um raciocínio dedutivo formado por duas premissas e uma conclusão",
+            "option_c": "Uma dúvida metódica",
+            "option_d": "Um diálogo",
+            "correct_option": "B",
+            "points": 1,
+            "time_limit": 15
+          },
+          {
+            "id": 34,
+            "challenge_id": 4,
+            "question_order": 8,
+            "category": "Filosofia",
+            "text": "O que estuda a Ética como ramo da Filosofia?",
+            "option_a": "A origem dos astros",
+            "option_b": "Os fundamentos da moral e do agir humano correcto",
+            "option_c": "As leis matemáticas",
+            "option_d": "A gramática das línguas",
+            "correct_option": "B",
+            "points": 1,
+            "time_limit": 15
+          },
+          {
+            "id": 35,
+            "challenge_id": 4,
+            "question_order": 9,
+            "category": "Filosofia",
+            "text": "O que defende o Empirismo na teoria do conhecimento?",
+            "option_a": "Que todo o conhecimento deriva da experiência sensorial",
+            "option_b": "Ideias inatas",
+            "option_c": "Razão pura única",
+            "option_d": "Verdade impossível",
+            "correct_option": "A",
+            "points": 1,
+            "time_limit": 15
+          },
+          {
+            "id": 36,
+            "challenge_id": 4,
+            "question_order": 10,
+            "category": "Filosofia",
+            "text": "Na filosofia africana, qual é o conceito ético de Ubuntu?",
+            "option_a": "Busca do poder",
+            "option_b": "Eu sou porque nós somos (humanidade compartilhada)",
+            "option_c": "Racionalismo estrito",
+            "option_d": "Riqueza material",
+            "correct_option": "B",
+            "points": 1,
+            "time_limit": 15
+          }
+        ]
+      }
+    ]
   }
 ]
