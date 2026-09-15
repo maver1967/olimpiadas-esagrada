@@ -129,6 +129,7 @@ db.serialize(() => {
 
 const repositoryFilePath = path.join(__dirname, 'data', 'sessions_repository.json');
 const backupFilePath = path.join(dataDir, 'sessions_backup.json');
+const CLOUD_STORAGE_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a0a44f97d40d13';
 
 async function autoSaveBackupJSON() {
   try {
@@ -142,21 +143,60 @@ async function autoSaveBackupJSON() {
     const jsonStr = JSON.stringify(weeks, null, 2);
     fs.writeFileSync(repositoryFilePath, jsonStr, 'utf8');
     try { fs.writeFileSync(backupFilePath, jsonStr, 'utf8'); } catch(e) {}
-    console.log('💾 Repositório permanente "sessions_repository.json" guardado com sucesso.');
+    console.log('💾 Repositório local "sessions_repository.json" guardado com sucesso.');
+
+    // Sincronização em tempo real com a Nuvem Global (Visível em todos os computadores da Internet)
+    try {
+      const response = await fetch(CLOUD_STORAGE_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'esagrada_sessions', data: weeks })
+      });
+      if (response.ok) {
+        console.log('🌐 Sincronizado instantaneamente com a Nuvem Global! (Visível em todos os dispositivos)');
+      }
+    } catch(cloudErr) {
+      console.error('Aviso: Falha temporária ao sincronizar com a Nuvem Global:', cloudErr.message);
+    }
+
   } catch (err) {
     console.error('Erro ao auto-guardar repositório JSON:', err.message);
   }
 }
 
 async function autoRestoreBackupJSON() {
-  const targetFile = fs.existsSync(repositoryFilePath) ? repositoryFilePath : (fs.existsSync(backupFilePath) ? backupFilePath : null);
-  if (!targetFile) return false;
-  try {
-    const raw = fs.readFileSync(targetFile, 'utf8');
-    const weeks = JSON.parse(raw);
-    if (!Array.isArray(weeks) || weeks.length === 0) return false;
+  let weeks = null;
 
-    console.log('🔄 A carregar repositório permanente de sessões:', targetFile);
+  // 1. Tenta descarregar primeiro da Nuvem Global (para obter o trabalho feito de qualquer computador)
+  try {
+    const cloudRes = await fetch(CLOUD_STORAGE_URL);
+    if (cloudRes.ok) {
+      const cloudObj = await cloudRes.json();
+      if (cloudObj && cloudObj.data && Array.isArray(cloudObj.data) && cloudObj.data.length > 0) {
+        weeks = cloudObj.data;
+        console.log('🌐 Sessões restauradas com sucesso a partir da NUVEM GLOBAL! (Visíveis em todos os computadores)');
+      }
+    }
+  } catch(e) {
+    console.log('Aviso: Não foi possível ler da nuvem global, a usar cópia local...');
+  }
+
+  // 2. Fallback para ficheiro local se a nuvem não tiver dados
+  if (!weeks) {
+    const targetFile = fs.existsSync(repositoryFilePath) ? repositoryFilePath : (fs.existsSync(backupFilePath) ? backupFilePath : null);
+    if (!targetFile) return false;
+    try {
+      const raw = fs.readFileSync(targetFile, 'utf8');
+      weeks = JSON.parse(raw);
+    } catch(e) {
+      return false;
+    }
+  }
+
+  if (!Array.isArray(weeks) || weeks.length === 0) return false;
+
+  try {
+    console.log('🔄 A restaurar estrutura de sessões na base de dados...');
     await dbQuery.run('DELETE FROM questions');
     await dbQuery.run('DELETE FROM challenges');
     await dbQuery.run('DELETE FROM weeks');
@@ -182,7 +222,7 @@ async function autoRestoreBackupJSON() {
         }
       }
     }
-    console.log('✅ Repositório permanente de sessões carregado com 100% de sucesso!');
+    console.log('✅ Sessões carregadas com 100% de sucesso!');
     return true;
   } catch (err) {
     console.error('Erro ao restaurar repositório JSON:', err.message);
