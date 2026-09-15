@@ -407,7 +407,11 @@ app.post('/api/admin/login', (req, res) => {
 // Ottieni settimane e sfide
 app.get('/api/admin/weeks', async (req, res) => {
   try {
-    const weeks = await db.getAllWeeksWithChallenges();
+    let weeks = await db.getAllWeeksWithChallenges();
+    if (!weeks || weeks.length === 0) {
+      await db.autoRestoreBackupJSON();
+      weeks = await db.getAllWeeksWithChallenges();
+    }
     res.json(weeks);
   } catch (err) {
     res.status(500).json({ error: err.message });
