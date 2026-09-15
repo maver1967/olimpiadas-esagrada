@@ -151,6 +151,28 @@ const questionsCatalog = {
     { text: "Qual é o oceano que banha toda a costa oriental de Moçambique?", a: "Oceano Atlântico", b: "Oceano Pacífico", c: "Oceano Índico", d: "Oceano Antártico", correct: "C" },
     { text: "Em que ano foi realizada a primeira edição da Copa das Nações Africanas (CAN)?", a: "1957", b: "1962", c: "1975", d: "1980", correct: "A" },
     { text: "Qual é a moeda oficial da República de Moçambique?", a: "Kwanza", b: "Metical", c: "Rand", d: "Shilling", correct: "B" }
+  ],
+
+  "Ensino Superior 1": [
+    { text: "Na Teoria Pura do Direito de Hans Kelsen, o que é a Norma Hipotética Fundamental (Grundnorm)?", a: "Um decreto executivo", b: "A norma pressuposta que fundamenta a validade de toda a ordem jurídica", c: "Um princípio moral religioso", d: "Uma lei ordinária", correct: "B" },
+    { text: "Em Epistemologia de Karl Popper, qual é o critério de demarcação da ciência?", a: "Verificabilidade empírica absoluta", b: "Falsificabilidade (Refutabilidade)", c: "Consenso popular", d: "Dogma filosófico", correct: "B" },
+    { text: "Na Filosofia Política de Thomas Hobbes, qual o propósito do Leviatã?", a: "Garantir a liberdade absoluta", b: "Superar a guerra de todos contra todos através do pacto e soberano", c: "Impor a democracia directa", d: "Abolir o Estado", correct: "B" },
+    { text: "Na Mecânica Quântica, o que estabelece o Princípio da Incerteza de Heisenberg?", a: "Impossibilidade de medir com precisão simultânea posição e momento", b: "Velocidade constante da luz", c: "Conservação da energia", d: "Negação do átomo", correct: "A" },
+    { text: "Em Análise Matemática, qual é o valor do limite fundamental lim(x->0) [sin(x)/x]?", a: "0", b: "1", c: "Infinito", d: "Indeterminado", correct: "B" },
+    { text: "Na História Africana Contemporânea, qual o significado histórico da Conferência de Bandung (1955)?", a: "Início da Guerra Fria", b: "Nascimento do Movimento dos Países Não-Alinhados e solidariedade Afro-Asiática", c: "Partilha de África", d: "Fim da 2ª Guerra Mundial", correct: "B" },
+    { text: "Na Linguística Geral de Ferdinand de Saussure, qual é a composição do Signo Linguístico?", a: "Palavra e som", b: "Significante (imagem acústica) e Significado (conceito)", c: "Gramática e sintaxe", d: "Frase e parágrafo", correct: "B" },
+    { text: "Em Biologia Molecular, qual o processo responsável pela síntese de RNA a partir do DNA?", a: "Tradução", b: "Transcrição", c: "Replicação", d: "Mitose", correct: "B" }
+  ],
+
+  "Ensino Superior 2": [
+    { text: "Na Fenomenologia do Espírito de Hegel, o que representa a 'Dialéctica do Senhor e do Escravo'?", a: "Luta pelo reconhecimento da auto-consciência e superação da alienação pelo trabalho", b: "Conflito militar medieval", c: "Teoria de mercado", d: "Lei jurídica romana", correct: "A" },
+    { text: "Em Hermenêutica Filosófica de Hans-Georg Gadamer, o que significa a 'Fusão de Horizontes'?", a: "Encontro interpretativo entre o horizonte do texto histórico e o horizonte do leitor", b: "Visão astronómica", c: "Teoria do caos", d: "Tradução literal", correct: "A" },
+    { text: "Em Álgebra Linear, quando é que uma matriz quadrada A é dita invertível?", a: "Quando o seu determinante é diferente de zero (det(A) != 0)", b: "Quando todos os elementos são nulos", c: "Quando det(A) = 0", d: "Quando é uma matriz linha", correct: "A" },
+    { text: "Em Biotecnologia e Genética Avançada, qual o mecanismo de acção do sistema CRISPR-Cas9?", a: "Vetor viral passivo", b: "Edição genómica precisa através de endonuclease guiada por RNA", c: "Microscopia electrónica", d: "Fusão de membrana", correct: "B" },
+    { text: "Na História Crítica de África, qual o contributo de Frantz Fanon em 'Os Condenados da Terra'?", a: "Análise psicológica da descolonização e desconstrução da violência colonial", b: "Defesa do colonialismo", c: "Tratado mercantil", d: "Gramática francesa", correct: "A" },
+    { text: "Em Física Teórica, qual a consequência do Princípio da Equivalência na Relatividade Geral?", a: "Gravidade é indistinguível de um referencial em aceleração (curvatura do espaço-tempo)", b: "Velocidade do som é finita", c: "Elétrons não giram", d: "Massa é estática", correct: "A" },
+    { text: "Em Teoria Crítica (Escola de Frankfurt), o que Adorno e Horkheimer denominam 'Indústria Cultural'?", a: "Produção de arte sacra", b: "Padronização e mercantilização da cultura para a alienação das massas", c: "Fabrico de instrumentos", d: "Ensino técnico", correct: "B" },
+    { text: "Em Bioética Contemporânea, qual o Princípio que exige maximizar os benefícios e minimizar os danos?", a: "Autonomia", b: "Beneficência e Não-Maleficência", c: "Justiça comutativa", d: "Paternalismo estatal", correct: "B" }
   ]
 };
 
@@ -159,9 +181,16 @@ function generateQuestions(subject, difficulty, count = 5, usedTexts = []) {
   const usedSet = new Set(usedTexts.map(t => t.toLowerCase().trim()));
   let pool = [];
 
-  // 1. Tenta obter o catálogo da disciplina pedida
+  // 1. Se for nivel Ensino Superior 1 ou 2, inclui as perguntas avançadas de nivel universitário
+  if (difficulty === "Ensino Superior 1" && questionsCatalog["Ensino Superior 1"]) {
+    pool = pool.concat(questionsCatalog["Ensino Superior 1"]);
+  } else if (difficulty === "Ensino Superior 2" && questionsCatalog["Ensino Superior 2"]) {
+    pool = pool.concat(questionsCatalog["Ensino Superior 2"]);
+  }
+
+  // 2. Tenta obter o catálogo da disciplina pedida
   if (questionsCatalog[subject] && Array.isArray(questionsCatalog[subject])) {
-    pool = [...questionsCatalog[subject]];
+    pool = pool.concat(questionsCatalog[subject]);
   } else {
     // Busca aproximada caso o nome da disciplina divirja ligeiramente
     for (let cat of Object.keys(questionsCatalog)) {
@@ -171,7 +200,7 @@ function generateQuestions(subject, difficulty, count = 5, usedTexts = []) {
     }
   }
 
-  // 2. Se a reserva da disciplina não for suficiente para a quantidade pedida, junta perguntas de outras disciplinas
+  // 3. Se a reserva da disciplina não for suficiente para a quantidade pedida, junta perguntas de outras disciplinas
   if (pool.length < numRequested) {
     for (let cat of Object.keys(questionsCatalog)) {
       const items = questionsCatalog[cat];
@@ -183,18 +212,21 @@ function generateQuestions(subject, difficulty, count = 5, usedTexts = []) {
     }
   }
 
-  // 3. Filtra perguntas que já foram usadas em semanas anteriores no torneio!
+  // 4. Filtra perguntas que já foram usadas em semanas anteriores no torneio!
   let unusedPool = pool.filter(q => !usedSet.has(q.text.toLowerCase().trim()));
-  // Se por alguma razão todas já foram usadas, utiliza o pool completo para não ficar sem perguntas
   if (unusedPool.length === 0) {
     unusedPool = pool;
   }
 
-  // 4. Embaralha o conjunto de perguntas não utilizadas
+  // 5. Embaralha o conjunto de perguntas não utilizadas
   let shuffled = [...unusedPool].sort(() => 0.5 - Math.random());
   let result = [];
 
-  // 5. Garante estritamente que retorna a quantidade EXACTA solicitada pelo utilizador sem duplicados
+  const categoryTag = (difficulty === "Ensino Superior 1" || difficulty === "Ensino Superior 2")
+    ? `${subject.toUpperCase()} [${difficulty.toUpperCase()}]`
+    : subject.toUpperCase();
+
+  // 6. Garante estritamente que retorna a quantidade EXACTA solicitada pelo utilizador sem duplicados
   let i = 0;
   while (result.length < numRequested && shuffled.length > 0) {
     let q = shuffled[i % shuffled.length];
@@ -208,6 +240,7 @@ function generateQuestions(subject, difficulty, count = 5, usedTexts = []) {
 
     result.push({
       ...q,
+      category: categoryTag,
       text: finalTitle
     });
     i++;
