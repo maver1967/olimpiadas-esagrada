@@ -26,7 +26,17 @@ const questionsCatalog = {
     { text: "Qual profeta foi levado ao céu num redemoinho com um carro de fogo?", a: "Isaías", b: "Elias", c: "Eliseu", d: "Jeremias", correct: "B" },
     { text: "Em que língua original foi escrito a maior parte do Novo Testamento?", a: "Hebraico", b: "Latim", c: "Grego Koiné", d: "Aramaico", correct: "C" },
     { text: "Qual é o mar que Moisés abriu para a passagem do povo de Israel?", a: "Mar Vermelho", b: "Mar Morto", c: "Mar Mediterrâneo", d: "Mar da Galileia", correct: "A" },
-    { text: "Quantos dias e noites choveu durante o Grande Dilúvio na arca de Noé?", a: "7 dias", b: "40 dias e 40 noites", c: "100 dias", d: "12 dias", correct: "B" }
+    { text: "Quantos dias e noites choveu durante o Grande Dilúvio na arca de Noé?", a: "7 dias", b: "40 dias e 40 noites", c: "100 dias", d: "12 dias", correct: "B" },
+    { text: "Quem recebeu os Dez Mandamentos no Monte Sinai?", a: "Abraão", b: "Moisés", c: "Josué", d: "Arão", correct: "B" },
+    { text: "Qual é a cidade onde os discípulos de Jesus foram chamados de Cristãos pela primeira vez?", a: "Jerusalém", b: "Antioquia", c: "Roma", d: "Damasco", correct: "B" },
+    { text: "Qual foi o primeiro milagre de Jesus narrado no Evangelho de São João?", a: "Cura do cego", b: "Transformação da água em vinho nas Bodas de Caná", c: "Multiplicação dos pães", d: "Ressurreição de Lázaro", correct: "B" },
+    { text: "Quem interpretou os sonhos do Faraó no Egipto tornando-se governador?", a: "José", b: "Benjamim", c: "Jacob", d: "David", correct: "A" },
+    { text: "Qual é o último livro do Novo Testamento na Bíblia Cristã?", a: "Atos dos Apóstolos", b: "Apocalipse (Revelação)", c: "Epístola de São Judas", d: "Hebreus", correct: "B" },
+    { text: "Quem foi lançado na cova dos leões por manter as suas orações a Deus?", a: "Daniel", b: "Jonas", c: "Jeremias", d: "Ezequiel", correct: "A" },
+    { text: "Qual profeta passou três dias e três noites no ventre de um grande peixe?", a: "Jonas", b: "Amós", c: "Miqueias", d: "Oseias", correct: "A" },
+    { text: "Qual é o mandamento principal ensinado por Jesus Cristo no Evangelho?", a: "Amar a Deus sobre todas as coisas e ao próximo como a si mesmo", b: "Acumular riquezas", c: "Julgar os outros", d: "Evitar o trabalho", correct: "A" },
+    { text: "Qual Rei sucedeu a David e edificou o Primeiro Templo de Jerusalém?", a: "Rei Salomão", b: "Rei Roboão", c: "Rei Ezequias", d: "Rei Acabe", correct: "A" },
+    { text: "Qual apóstolo é considerado a Pedra sobre a qual Jesus edificou a sua Igreja?", a: "São Pedro", b: "São João", c: "São Mateus", d: "São Bartolomeu", correct: "A" }
   ],
 
   "Religiões & História das Religiões": [
@@ -181,52 +191,45 @@ function generateQuestions(subject, difficulty, count = 5, usedTexts = []) {
   const usedSet = new Set(usedTexts.map(t => t.toLowerCase().trim()));
   let pool = [];
 
-  // 1. Se for nivel Ensino Superior 1 ou 2, inclui as perguntas avançadas de nivel universitário
-  if (difficulty === "Ensino Superior 1" && questionsCatalog["Ensino Superior 1"]) {
-    pool = pool.concat(questionsCatalog["Ensino Superior 1"]);
-  } else if (difficulty === "Ensino Superior 2" && questionsCatalog["Ensino Superior 2"]) {
-    pool = pool.concat(questionsCatalog["Ensino Superior 2"]);
-  }
-
-  // 2. Tenta obter o catálogo da disciplina pedida
+  // 1. Obtém EXCLUSIVAMENTE o catálogo da disciplina pedida (isolamento rigoroso por matéria)
   if (questionsCatalog[subject] && Array.isArray(questionsCatalog[subject])) {
-    pool = pool.concat(questionsCatalog[subject]);
+    pool = [...questionsCatalog[subject]];
   } else {
-    // Busca aproximada caso o nome da disciplina divirja ligeiramente
+    // Busca por correspondência de nome
     for (let cat of Object.keys(questionsCatalog)) {
-      if (cat.toLowerCase().includes(subject.toLowerCase()) || subject.toLowerCase().includes(cat.toLowerCase())) {
-        pool = pool.concat(questionsCatalog[cat]);
-      }
-    }
-  }
-
-  // 3. Se a reserva da disciplina não for suficiente para a quantidade pedida, junta perguntas de outras disciplinas
-  if (pool.length < numRequested) {
-    for (let cat of Object.keys(questionsCatalog)) {
-      const items = questionsCatalog[cat];
-      for (let item of items) {
-        if (!pool.some(q => q.text === item.text)) {
-          pool.push(item);
+      if (cat !== "Ensino Superior 1" && cat !== "Ensino Superior 2") {
+        if (cat.toLowerCase().includes(subject.toLowerCase()) || subject.toLowerCase().includes(cat.toLowerCase())) {
+          pool = pool.concat(questionsCatalog[cat]);
         }
       }
     }
   }
 
-  // 4. Filtra perguntas que já foram usadas em semanas anteriores no torneio!
+  // 2. Se o pool da disciplina tiver menos perguntas do que o pedido, complementa com perguntas do mesmo nível
+  if (pool.length < numRequested) {
+    if (difficulty === "Ensino Superior 1" && questionsCatalog["Ensino Superior 1"]) {
+      pool = pool.concat(questionsCatalog["Ensino Superior 1"]);
+    } else if (difficulty === "Ensino Superior 2" && questionsCatalog["Ensino Superior 2"]) {
+      pool = pool.concat(questionsCatalog["Ensino Superior 2"]);
+    }
+  }
+
+  // 3. Filtra perguntas que já foram usadas anteriormente
   let unusedPool = pool.filter(q => !usedSet.has(q.text.toLowerCase().trim()));
   if (unusedPool.length === 0) {
     unusedPool = pool;
   }
 
-  // 5. Embaralha o conjunto de perguntas não utilizadas
+  // 4. Embaralha estritamente o conjunto da disciplina solicitada
   let shuffled = [...unusedPool].sort(() => 0.5 - Math.random());
   let result = [];
 
-  const categoryTag = (difficulty === "Ensino Superior 1" || difficulty === "Ensino Superior 2")
+  const isSuperior = (difficulty === "Ensino Superior 1" || difficulty === "Ensino Superior 2");
+  const categoryTag = isSuperior
     ? `${subject.toUpperCase()} [${difficulty.toUpperCase()}]`
     : subject.toUpperCase();
 
-  // 6. Garante estritamente que retorna a quantidade EXACTA solicitada pelo utilizador sem duplicados
+  // 5. Garante estritamente que retorna a quantidade EXACTA solicitada sem misturar matérias
   let i = 0;
   while (result.length < numRequested && shuffled.length > 0) {
     let q = shuffled[i % shuffled.length];
